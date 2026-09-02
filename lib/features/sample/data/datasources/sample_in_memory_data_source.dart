@@ -1,11 +1,10 @@
 import '../models/sample_item_model.dart';
-import 'sample_remote_data_source.dart';
+import 'sample_data_source.dart';
 
-/// In-memory stand-in for [SampleRemoteDataSource]. Wired by the DI container
-/// when `AppConfig.useFirebase` is false so the app runs (and CI passes)
-/// without Firebase credentials.
-class SampleLocalDataSource implements SampleRemoteDataSource {
-  SampleLocalDataSource();
+/// In-memory [SampleDataSource]. Wired by the DI container when Firebase is
+/// disabled so the app runs (and CI passes) without Firebase credentials.
+class SampleInMemoryDataSource implements SampleDataSource {
+  SampleInMemoryDataSource();
 
   final List<SampleItemModel> _items = [
     SampleItemModel(
@@ -29,7 +28,7 @@ class SampleLocalDataSource implements SampleRemoteDataSource {
   Future<SampleItemModel> addSampleItem(String title) async {
     await Future<void>.delayed(const Duration(milliseconds: 150));
     final model = SampleItemModel(
-      id: 'local-${++_autoId}',
+      id: 'mem-${++_autoId}',
       title: title,
       createdAt: DateTime.now(),
     );

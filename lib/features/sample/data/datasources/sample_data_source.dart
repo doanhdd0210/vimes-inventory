@@ -5,16 +5,19 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../models/sample_item_model.dart';
 
-abstract class SampleRemoteDataSource {
+/// Contract for the Sample feature's backing store. Implemented by
+/// [SampleFirestoreDataSource] (production) and `SampleInMemoryDataSource`
+/// (tests / offline).
+abstract class SampleDataSource {
   Future<List<SampleItemModel>> getSampleItems();
 
   Future<SampleItemModel> addSampleItem(String title);
 }
 
-/// Cloud Firestore implementation. Any Firestore error is normalised to a
+/// Cloud Firestore implementation. Every Firestore error is normalised to a
 /// [ServerException] so the repository has a single failure type to map.
-class SampleRemoteDataSourceImpl implements SampleRemoteDataSource {
-  SampleRemoteDataSourceImpl(this._firestore);
+class SampleFirestoreDataSource implements SampleDataSource {
+  SampleFirestoreDataSource(this._firestore);
 
   final FirebaseFirestore _firestore;
 

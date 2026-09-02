@@ -67,23 +67,22 @@ its shape when building a real feature.
 ```bash
 flutter pub get
 
-# default entry point == dev flavor
-flutter run
-
-# explicit flavors (Android product flavors are wired; iOS schemes are a TODO)
-flutter run --flavor dev     -t lib/main_dev.dart
-flutter run --flavor staging -t lib/main_staging.dart
-flutter run --flavor prod    -t lib/main_prod.dart
-
-# run fully offline (in-memory datasources, no Firebase needed)
-flutter run --dart-define=USE_FIREBASE=false
+flutter run                        # == main_dev.dart
+flutter run -t lib/main_dev.dart
+flutter run -t lib/main_staging.dart
+flutter run -t lib/main_prod.dart
 ```
+
+Flavors are **Dart-level** (`lib/core/flavors/` + `main_<flavor>.dart`), so no
+`--flavor` and no native config is required. Firebase is currently forced off
+(see below), so the app always runs on the in-memory datasources for now.
 
 ## Quality gates
 
 ```bash
 flutter analyze      # 0 issues
 flutter test         # unit + bloc tests
+dart format --output=none --set-exit-if-changed .
 ```
 
 ---
@@ -118,9 +117,36 @@ flutterfire configure \
 `ios/Runner/GoogleService-Info.plist`. Decide per repo whether those are
 committed (see `.gitignore`).
 
-For flavor-specific Firebase projects, run `flutterfire configure` once per
-flavor with `--android-package-name` / `--ios-bundle-id` matching the suffixed
-ids (`com.doanhdd.vimes_inventory.dev`, `.staging`, and the base id for prod).
+---
+
+## Adding native flavors (later, when you need per-env app IDs)
+
+The base deliberately ships Dart-only flavors. Add native product flavors when
+you need a distinct `applicationId` / bundle id (e.g. dev + prod installed
+side by side) or a separate Firebase project per environment.
+
+**Android** — `android/app/build.gradle.kts`:
+
+```kotlin
+flavorDimensions += "env"
+productFlavors {
+    create("dev")     { dimension = "env"; applicationIdSuffix = ".dev";     resValue("string", "app_name", "VIMES Inventory Dev") }
+    create("staging") { dimension = "env"; applicationIdSuffix = ".staging"; resValue("string", "app_name", "VIMES Inventory Staging") }
+    create("prod")    { dimension = "env";                                   resValue("string", "app_name", "VIMES Inventory") }
+}
+```
+
+Then set `android:label="@string/app_name"` in `AndroidManifest.xml` and run
+with `flutter run --flavor dev -t lib/main_dev.dart`.
+
+**iOS** — duplicate the `Debug`/`Release`/`Profile` build configurations to
+`Debug-dev`, `Release-dev`, … in Xcode, add one scheme per flavor, and point
+each at the matching xcconfig. `flutter run --flavor dev` then resolves to the
+`dev` scheme.
+
+Per-flavor Firebase: run `flutterfire configure` once per flavor with
+`--android-package-name` / `--ios-bundle-id` matching the suffixed ids
+(`com.doanhdd.vimes_inventory.dev`, `.staging`, base id for prod).
 
 ---
 

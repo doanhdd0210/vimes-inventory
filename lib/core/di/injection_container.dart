@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../features/sample/data/datasources/sample_local_data_source.dart';
-import '../../features/sample/data/datasources/sample_remote_data_source.dart';
+import '../../features/sample/data/datasources/sample_data_source.dart';
+import '../../features/sample/data/datasources/sample_in_memory_data_source.dart';
 import '../../features/sample/data/repositories/sample_repository_impl.dart';
 import '../../features/sample/domain/repositories/sample_repository.dart';
 import '../../features/sample/domain/usecases/add_sample_item.dart';
@@ -58,10 +58,10 @@ void _initSample({required bool firebaseEnabled}) {
 
   // Data
   sl.registerLazySingleton<SampleRepository>(() => SampleRepositoryImpl(sl()));
-  sl.registerLazySingleton<SampleRemoteDataSource>(
+  sl.registerLazySingleton<SampleDataSource>(
     () => firebaseEnabled
-        ? SampleRemoteDataSourceImpl(sl())
-        : SampleLocalDataSource(),
+        ? SampleFirestoreDataSource(sl())
+        : SampleInMemoryDataSource(),
   );
 }
 

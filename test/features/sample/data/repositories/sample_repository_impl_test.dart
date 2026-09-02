@@ -3,14 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vimes_inventory/core/error/exceptions.dart';
 import 'package:vimes_inventory/core/error/failures.dart';
-import 'package:vimes_inventory/features/sample/data/datasources/sample_remote_data_source.dart';
+import 'package:vimes_inventory/features/sample/data/datasources/sample_data_source.dart';
 import 'package:vimes_inventory/features/sample/data/models/sample_item_model.dart';
 import 'package:vimes_inventory/features/sample/data/repositories/sample_repository_impl.dart';
 
-class _MockRemoteDataSource extends Mock implements SampleRemoteDataSource {}
+class _MockSampleDataSource extends Mock implements SampleDataSource {}
 
 void main() {
-  late _MockRemoteDataSource remote;
+  late _MockSampleDataSource dataSource;
   late SampleRepositoryImpl repository;
 
   final tModels = [
@@ -18,13 +18,13 @@ void main() {
   ];
 
   setUp(() {
-    remote = _MockRemoteDataSource();
-    repository = SampleRepositoryImpl(remote);
+    dataSource = _MockSampleDataSource();
+    repository = SampleRepositoryImpl(dataSource);
   });
 
   group('getSampleItems', () {
     test('returns Right with data from the datasource', () async {
-      when(() => remote.getSampleItems()).thenAnswer((_) async => tModels);
+      when(() => dataSource.getSampleItems()).thenAnswer((_) async => tModels);
 
       final result = await repository.getSampleItems();
 
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('maps ServerException to ServerFailure', () async {
-      when(() => remote.getSampleItems()).thenThrow(
+      when(() => dataSource.getSampleItems()).thenThrow(
         const ServerException(message: 'offline', statusCode: 'unavailable'),
       );
 
@@ -50,18 +50,18 @@ void main() {
   group('addSampleItem', () {
     test('returns Right on success', () async {
       when(
-        () => remote.addSampleItem(any()),
+        () => dataSource.addSampleItem(any()),
       ).thenAnswer((_) async => tModels.first);
 
       final result = await repository.addSampleItem('A');
 
       expect(result.isRight(), isTrue);
-      verify(() => remote.addSampleItem('A')).called(1);
+      verify(() => dataSource.addSampleItem('A')).called(1);
     });
 
     test('maps ServerException to ServerFailure', () async {
       when(
-        () => remote.addSampleItem(any()),
+        () => dataSource.addSampleItem(any()),
       ).thenThrow(const ServerException(message: 'denied'));
 
       final result = await repository.addSampleItem('A');

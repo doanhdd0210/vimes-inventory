@@ -90,9 +90,18 @@ flutter test         # unit + bloc tests
 
 ## Firebase setup (one-time)
 
-The committed `lib/firebase_options.dart` is a **placeholder**. Until it is
-generated, `FirebaseBootstrap` logs a warning and the app falls back to the
-in-memory datasources.
+**Firebase is temporarily switched off in this base.**
+`FlavorConfig.firebaseTemporarilyDisabled = true` forces every flavor onto the
+in-memory datasources, so `Firebase.initializeApp` is never called and
+`lib/firebase_options.dart` stays a harmless placeholder. The Firestore
+datasource / repository / DI wiring is all in place — only the flag is off.
+
+To turn Firebase on:
+
+1. Generate the options (see below).
+2. Set `firebaseTemporarilyDisabled = false` in
+   `lib/core/flavors/flavor_config.dart` (dev/staging/prod then follow their
+   per-flavor `useFirebase` default of `true`).
 
 ```bash
 # the CLI token in this environment is expired — re-auth first:

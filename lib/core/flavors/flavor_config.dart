@@ -4,6 +4,12 @@ import 'flavor.dart';
 /// [FlavorConfig.instance]. Set it up from a flavor entry point
 /// (`main_dev.dart`, `main_staging.dart`, `main_prod.dart`) before `runApp`.
 class FlavorConfig {
+  /// TEMPORARY: Firebase is not configured yet (`flutterfire configure` still
+  /// pending). While this is `true` every flavor runs on the in-memory
+  /// datasources regardless of the per-flavor setting. Flip to `false` once
+  /// `lib/firebase_options.dart` is generated.
+  static const bool firebaseTemporarilyDisabled = true;
+
   FlavorConfig._({
     required this.flavor,
     required this.appName,
@@ -47,7 +53,7 @@ class FlavorConfig {
       appName: appName ?? _defaultAppName(flavor),
       apiBaseUrl: apiBaseUrl ?? _defaultApiBaseUrl(flavor),
       firebaseProjectId: firebaseProjectId ?? _defaultFirebaseProjectId(flavor),
-      useFirebase: useFirebase ?? true,
+      useFirebase: firebaseTemporarilyDisabled ? false : (useFirebase ?? true),
       enableLogging: enableLogging ?? flavor != Flavor.prod,
     );
     _instance = config;
@@ -61,7 +67,7 @@ class FlavorConfig {
     appName: _defaultAppName(Flavor.dev),
     apiBaseUrl: _defaultApiBaseUrl(Flavor.dev),
     firebaseProjectId: _defaultFirebaseProjectId(Flavor.dev),
-    useFirebase: true,
+    useFirebase: !firebaseTemporarilyDisabled,
     enableLogging: true,
   );
 

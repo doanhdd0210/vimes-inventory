@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/master_data/presentation/master_data_hub_page.dart';
 import '../../features/warehouse_receipt/presentation/view/receipt_detail_page.dart';
 import '../../features/warehouse_receipt/presentation/view/receipt_form_page.dart';
 import '../../features/warehouse_receipt/presentation/view/receipt_list_page.dart';
@@ -31,6 +32,11 @@ class AppRouter {
             path: AppRoute.receiptDetail.path,
             builder: (context, state) =>
                 ReceiptDetailPage(receiptId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            name: AppRoute.masterData.name,
+            path: AppRoute.masterData.path,
+            builder: (context, state) => const MasterDataHubPage(),
           ),
         ],
       ),

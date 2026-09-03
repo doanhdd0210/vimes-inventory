@@ -3,7 +3,8 @@
 enum AppRoute {
   home(name: 'home', path: '/'),
   receiptForm(name: 'receiptForm', path: 'new'),
-  receiptDetail(name: 'receiptDetail', path: 'detail/:id');
+  receiptDetail(name: 'receiptDetail', path: 'detail/:id'),
+  masterData(name: 'masterData', path: 'danh-muc');
 
   const AppRoute({required this.name, required this.path});
 

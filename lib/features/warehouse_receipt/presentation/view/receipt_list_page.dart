@@ -31,7 +31,16 @@ class _ReceiptListView extends StatelessWidget {
     final df = DateFormat('dd/MM/yyyy');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Phiếu nhập kho')),
+      appBar: AppBar(
+        title: const Text('Phiếu nhập kho'),
+        actions: [
+          IconButton(
+            tooltip: 'Danh mục',
+            icon: const Icon(Icons.folder_outlined),
+            onPressed: () => context.pushNamed(AppRoute.masterData.name),
+          ),
+        ],
+      ),
       body: BlocBuilder<ReceiptListBloc, ReceiptListState>(
         builder: (context, state) {
           return switch (state.status) {

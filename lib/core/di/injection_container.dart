@@ -1,6 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/auth/data/auth_data_source.dart';
+import '../../features/auth/data/auth_repository_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/presentation/auth_cubit.dart';
+import '../../features/master_data/data/master_data_seeder.dart';
 import '../../features/master_data/data/master_seed.dart';
 import '../../features/master_data/data/models/master_models.dart';
 import '../../features/master_data/domain/entities/app_user.dart';
@@ -43,9 +49,25 @@ Future<void> configureDependencies({bool? useFirebase}) async {
       (FlavorConfig.isInitialized ? FlavorConfig.instance.useFirebase : true);
 
   await _initCore(firebaseEnabled: firebaseEnabled);
+  _initAuth(firebaseEnabled: firebaseEnabled);
   _initMasterData(firebaseEnabled: firebaseEnabled);
   _initStock(firebaseEnabled: firebaseEnabled);
   _initWarehouseReceipt(firebaseEnabled: firebaseEnabled);
+
+  if (firebaseEnabled) {
+    sl.registerLazySingleton(() => MasterDataSeeder(sl()));
+    await sl<MasterDataSeeder>().seedIfEmpty();
+  }
+}
+
+void _initAuth({required bool firebaseEnabled}) {
+  sl.registerLazySingleton<AuthDataSource>(
+    () => firebaseEnabled
+        ? FirebaseAuthDataSource(FirebaseAuth.instance)
+        : FakeAuthDataSource(),
+  );
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
+  sl.registerLazySingleton<AuthCubit>(() => AuthCubit(sl()));
 }
 
 void _initStock({required bool firebaseEnabled}) {

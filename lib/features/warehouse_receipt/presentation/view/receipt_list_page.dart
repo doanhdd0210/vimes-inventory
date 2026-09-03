@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/router/app_route.dart';
+import '../../../auth/presentation/auth_cubit.dart';
 import '../../domain/usecases/get_warehouse_receipts.dart';
 import '../viewmodel/receipt_list_bloc.dart';
 
@@ -43,6 +44,11 @@ class _ReceiptListView extends StatelessWidget {
             tooltip: 'Danh mục',
             icon: const Icon(Icons.folder_outlined),
             onPressed: () => context.pushNamed(AppRoute.masterData.name),
+          ),
+          IconButton(
+            tooltip: 'Đăng xuất',
+            icon: const Icon(Icons.logout),
+            onPressed: () => context.read<AuthCubit>().signOut(),
           ),
         ],
       ),

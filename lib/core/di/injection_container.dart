@@ -53,11 +53,6 @@ Future<void> configureDependencies({bool? useFirebase}) async {
   _initMasterData(firebaseEnabled: firebaseEnabled);
   _initStock(firebaseEnabled: firebaseEnabled);
   _initWarehouseReceipt(firebaseEnabled: firebaseEnabled);
-
-  if (firebaseEnabled) {
-    sl.registerLazySingleton(() => MasterDataSeeder(sl()));
-    await sl<MasterDataSeeder>().seedIfEmpty();
-  }
 }
 
 void _initAuth({required bool firebaseEnabled}) {
@@ -67,7 +62,19 @@ void _initAuth({required bool firebaseEnabled}) {
         : FakeAuthDataSource(),
   );
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
-  sl.registerLazySingleton<AuthCubit>(() => AuthCubit(sl()));
+
+  if (firebaseEnabled) {
+    sl.registerLazySingleton(() => MasterDataSeeder(sl()));
+  }
+  sl.registerLazySingleton<AuthCubit>(
+    () => AuthCubit(
+      sl(),
+      // Firestore seeding needs an authenticated request → run it on sign-in.
+      onAuthenticated: firebaseEnabled
+          ? () => sl<MasterDataSeeder>().seedIfEmpty()
+          : null,
+    ),
+  );
 }
 
 void _initStock({required bool firebaseEnabled}) {

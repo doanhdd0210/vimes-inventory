@@ -23,10 +23,18 @@ class AuthState extends Equatable {
   List<Object?> get props => [status, account];
 }
 
-/// App-wide auth holder. Drives the router redirect.
+/// App-wide auth holder. Drives the router redirect. [onAuthenticated] runs
+/// once, the first time a user is signed in (used to seed Firestore, which
+/// needs an authenticated request).
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit(this._repository) : super(const AuthState()) {
+  AuthCubit(this._repository, {Future<void> Function()? onAuthenticated})
+    : _onAuthenticated = onAuthenticated,
+      super(const AuthState()) {
     _sub = _repository.authStateChanges().listen((account) {
+      if (account != null && !_ranOnAuthenticated) {
+        _ranOnAuthenticated = true;
+        _onAuthenticated?.call();
+      }
       emit(
         account == null
             ? const AuthState.unauthenticated()
@@ -36,6 +44,8 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   final AuthRepository _repository;
+  final Future<void> Function()? _onAuthenticated;
+  bool _ranOnAuthenticated = false;
   late final StreamSubscription<AuthAccount?> _sub;
 
   bool signingIn = false;

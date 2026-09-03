@@ -4,8 +4,8 @@ Dev-test deliverable: entry form for a **Phiếu nhập kho – Mẫu 01‑VT**
 (Thông tư 200/2014/TT‑BTC) inside a small inventory app.
 
 Stack: **Flutter** · **Clean Architecture** + **MVVM** (the BLoC is the ViewModel) ·
-**flutter_bloc** · **go_router** · **get_it** · **dartz** · **Cloud Firestore**
-(wiring complete; the app ships in offline mode so it runs with zero setup).
+**flutter_bloc** · **go_router** · **get_it** · **dartz** · **Firebase Auth** +
+**Cloud Firestore** (a one-line switch also runs it fully offline — see below).
 
 ---
 
@@ -17,20 +17,29 @@ flutter test          # 80 tests
 flutter run           # == flutter run -t lib/main_dev.dart
 ```
 
-The app runs **offline** out of the box (`FlavorConfig.firebaseTemporarilyDisabled = true`):
-`FakeAuthDataSource` + in-memory repositories seeded with demo master data. No
-Firebase project access needed.
+### Chạy với Firebase (mặc định)
 
-**Demo accounts** (password `123456`, email is pre-filled on the login screen):
+CSDL là **Cloud Firestore**, project `vimes-inventory-doanhdd` (options + native
+config đã commit sẵn). Đăng nhập bằng **Firebase Auth (email/password)** — dùng
+tài khoản đã tạo trên console:
 
-| Email | Vai trò |
+| Email | Mật khẩu |
 |---|---|
-| `admin@vimes.local` | quản trị |
-| `thukho@vimes.local` | thủ kho |
-| `ketoan@vimes.local` | kế toán |
+| `reviewer@vimes.local` | `Vimes@2026` |
 
-Đăng nhập → **Lập phiếu nhập kho** (wizard 3 bước) → phiếu được lưu và ghi sổ
-tồn kho; xem lại ở **Danh sách phiếu**, **Tồn kho**, **Thẻ kho**.
+> App không có màn đăng ký. Nếu tài khoản trên không vào được (project bị tạm
+> dừng / xoá), xem mục **Offline** bên dưới — chạy đủ chức năng không cần Firebase.
+
+Lần đăng nhập đầu, `MasterDataSeeder` tự nạp 7 collection danh mục. Sau đó:
+**Lập phiếu nhập kho** (wizard 3 bước) → phiếu được lưu bằng 1 transaction, ghi
+`warehouse_receipts` + `receipt_numbers` + `stock_ledger` + `inventory_stock`;
+xem lại ở **Danh sách phiếu**, **Tồn kho**, **Thẻ kho**.
+
+### Chạy offline (không cần Firebase)
+
+`lib/core/flavors/flavor_config.dart` → `firebaseTemporarilyDisabled = true`,
+chạy lại. `FakeAuthDataSource` + repo in-memory seed sẵn; login pre-fill
+`admin@vimes.local` / `123456` (cả `thukho@`, `ketoan@`). Mọi luồng chạy y hệt.
 
 ---
 
@@ -98,20 +107,21 @@ dart format --output=none --set-exit-if-changed .
 
 ## Firebase
 
-Everything for Cloud Firestore + Firebase Auth is wired (datasources,
-`runTransaction` stock posting, `MasterDataSeeder`, `firestore.rules`,
-`firebase_options.dart`, native config) and was verified against the live
-project `vimes-inventory-doanhdd`. To switch from offline to live:
+Default CSDL. Everything is wired and deployed for project
+`vimes-inventory-doanhdd`: datasources, `runTransaction` stock posting,
+`MasterDataSeeder`, `firestore.rules` + `firestore.indexes.json` (deployed),
+`firebase_options.dart`, `google-services.json`, `GoogleService-Info.plist`.
+Verified end-to-end on a real device + iOS simulator.
 
-1. `lib/core/flavors/flavor_config.dart` → `firebaseTemporarilyDisabled = false`.
-2. Enable Email/Password auth + create an account in the Firebase console.
-3. `firebase deploy --only firestore:rules,firestore:indexes`.
+Firestore has **no `CREATE TABLE`** — a collection appears on its first write.
+The 7 master collections are auto-seeded on first sign-in; the 4 transaction
+collections (`warehouse_receipts`, `receipt_numbers`, `stock_ledger`,
+`inventory_stock`) materialise when the first phiếu is saved.
+`warehouse_receipt_items` is an embedded `items[]` array, not a collection.
 
-Full steps: [`docs/firebase_setup.md`](docs/firebase_setup.md).
-Firestore has no `CREATE TABLE` — collections appear on first write; the 7 master
-collections are auto-seeded on first sign-in, the 4 transaction collections
-(`warehouse_receipts`, `receipt_numbers`, `stock_ledger`, `inventory_stock`)
-materialise when the first phiếu is saved.
+Rules are currently DEMO (`allow read, write: if request.auth != null`); the
+role-based production rules are kept as a comment block in `firestore.rules`.
+Pointing at another Firebase project: [`docs/firebase_setup.md`](docs/firebase_setup.md).
 
 ---
 

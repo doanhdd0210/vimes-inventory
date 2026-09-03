@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -79,12 +81,68 @@ class _ReceiptDetailPageState extends State<ReceiptDetailPage> {
               _kv('Cộng', r.totalAmount.asCurrencyVnd),
               _kv('Bằng chữ', VndWords.of(r.totalAmount)),
               _kv('Chứng từ gốc kèm theo', '${r.attachedDocumentCount}'),
+              if (r.preparerSignature != null ||
+                  r.delivererSignature != null ||
+                  r.storekeeperSignature != null ||
+                  r.chiefAccountantSignature != null) ...[
+                const Divider(height: 24),
+                Text('Chữ ký', style: context.texts.titleMedium),
+                const SizedBox(height: 8),
+                _sig('Người lập phiếu', r.preparerName, r.preparerSignature),
+                _sig('Người giao hàng', r.delivererName, r.delivererSignature),
+                _sig('Thủ kho', r.storekeeperName, r.storekeeperSignature),
+                _sig(
+                  'Kế toán trưởng',
+                  r.chiefAccountantName,
+                  r.chiefAccountantSignature,
+                ),
+              ],
             ],
           );
         },
       ),
     );
   }
+
+  Widget _sig(String role, String? name, String? base64Png) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 150,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(role, style: const TextStyle(color: Colors.grey)),
+              if ((name ?? '').isNotEmpty)
+                Text(name!, style: const TextStyle(fontSize: 12)),
+            ],
+          ),
+        ),
+        Expanded(
+          child: base64Png == null
+              ? const Text('— chưa ký', style: TextStyle(color: Colors.grey))
+              : Container(
+                  height: 72,
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.black12),
+                  ),
+                  child: Image.memory(
+                    base64Decode(base64Png),
+                    height: 60,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                  ),
+                ),
+        ),
+      ],
+    ),
+  );
 
   Widget _kv(String k, String v) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),

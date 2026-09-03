@@ -126,6 +126,7 @@ class _ItemRow extends StatelessWidget {
                 child: _ItemPickerField(
                   selected: selected,
                   items: options.items,
+                  uomNameOf: options.uomName,
                   errorText: errorFor('itemId'),
                   onPicked: (it) => onChanged(
                     item.fromItem(it, unitName: options.uomName(it.uomId)),
@@ -144,6 +145,18 @@ class _ItemRow extends StatelessWidget {
               ),
             ],
           ),
+          // Đơn vị tính (cột D) + mã (cột C) — snapshot theo vật tư đã chọn.
+          if (item.itemId != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 30, top: 4),
+              child: Text(
+                'ĐVT: ${item.unit.trim().isEmpty ? '—' : item.unit}'
+                '${item.code.trim().isEmpty ? '' : '   ·   Mã: ${item.code}'}',
+                style: context.texts.labelSmall?.copyWith(
+                  color: context.colors.outline,
+                ),
+              ),
+            ),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -206,12 +219,14 @@ class _ItemPickerField extends StatelessWidget {
   const _ItemPickerField({
     required this.selected,
     required this.items,
+    required this.uomNameOf,
     required this.onPicked,
     this.errorText,
   });
 
   final Item? selected;
   final List<Item> items;
+  final String Function(String? uomId) uomNameOf;
   final ValueChanged<Item> onPicked;
   final String? errorText;
 
@@ -223,7 +238,7 @@ class _ItemPickerField extends StatelessWidget {
           context: context,
           showDragHandle: true,
           isScrollControlled: true,
-          builder: (_) => _ItemSheet(items: items),
+          builder: (_) => _ItemSheet(items: items, uomNameOf: uomNameOf),
         );
         if (picked != null) onPicked(picked);
       },
@@ -249,9 +264,10 @@ class _ItemPickerField extends StatelessWidget {
 }
 
 class _ItemSheet extends StatefulWidget {
-  const _ItemSheet({required this.items});
+  const _ItemSheet({required this.items, required this.uomNameOf});
 
   final List<Item> items;
+  final String Function(String? uomId) uomNameOf;
 
   @override
   State<_ItemSheet> createState() => _ItemSheetState();
@@ -296,6 +312,7 @@ class _ItemSheetState extends State<_ItemSheet> {
                     title: Text(it.name),
                     subtitle: Text(
                       'Mã: ${it.code}'
+                      '${widget.uomNameOf(it.uomId).isEmpty ? '' : ' · ĐVT: ${widget.uomNameOf(it.uomId)}'}'
                       '${it.defaultUnitPrice == null ? '' : ' · ĐG: ${it.defaultUnitPrice!.asCurrencyVnd}'}',
                     ),
                     onTap: () => Navigator.of(context).pop(it),

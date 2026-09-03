@@ -4,7 +4,10 @@ import '../../../../master_data/domain/entities/item.dart';
 import '../../../domain/entities/warehouse_receipt.dart';
 import '../../../domain/entities/warehouse_receipt_item.dart';
 
-const Object _keep = Object();
+/// copyWith sentinel: an argument left at [keepField] keeps the current value;
+/// passing an explicit `null` clears it. Lets callers patch one nullable field
+/// without wiping the others.
+const Object keepField = Object();
 
 /// Editable draft of one line. Picking an [Item] fills the snapshot fields.
 class ReceiptItemFormData extends Equatable {
@@ -42,29 +45,29 @@ class ReceiptItemFormData extends Equatable {
   );
 
   ReceiptItemFormData copyWith({
-    Object? itemId = _keep,
+    Object? itemId = keepField,
     String? name,
     String? code,
     String? unit,
-    Object? uomId = _keep,
-    Object? quantityDoc = _keep,
-    Object? quantityActual = _keep,
-    Object? unitPrice = _keep,
+    Object? uomId = keepField,
+    Object? quantityDoc = keepField,
+    Object? quantityActual = keepField,
+    Object? unitPrice = keepField,
   }) {
     return ReceiptItemFormData(
       rowId: rowId,
-      itemId: identical(itemId, _keep) ? this.itemId : itemId as String?,
+      itemId: identical(itemId, keepField) ? this.itemId : itemId as String?,
       name: name ?? this.name,
       code: code ?? this.code,
       unit: unit ?? this.unit,
-      uomId: identical(uomId, _keep) ? this.uomId : uomId as String?,
-      quantityDoc: identical(quantityDoc, _keep)
+      uomId: identical(uomId, keepField) ? this.uomId : uomId as String?,
+      quantityDoc: identical(quantityDoc, keepField)
           ? this.quantityDoc
           : quantityDoc as num?,
-      quantityActual: identical(quantityActual, _keep)
+      quantityActual: identical(quantityActual, keepField)
           ? this.quantityActual
           : quantityActual as num?,
-      unitPrice: identical(unitPrice, _keep)
+      unitPrice: identical(unitPrice, keepField)
           ? this.unitPrice
           : unitPrice as num?,
     );
@@ -96,6 +99,26 @@ class ReceiptItemFormData extends Equatable {
   ];
 }
 
+/// The four people who sign a phiếu nhập kho (Mẫu 01‑VT signature block).
+enum SignatureRole { preparer, deliverer, storekeeper, chiefAccountant }
+
+extension SignatureRoleX on SignatureRole {
+  /// Key used in the form's error map + as the persisted field name prefix.
+  String get errorKey => switch (this) {
+    SignatureRole.preparer => 'preparerSignature',
+    SignatureRole.deliverer => 'delivererSignature',
+    SignatureRole.storekeeper => 'storekeeperSignature',
+    SignatureRole.chiefAccountant => 'chiefAccountantSignature',
+  };
+
+  String get label => switch (this) {
+    SignatureRole.preparer => 'Người lập phiếu',
+    SignatureRole.deliverer => 'Người giao hàng',
+    SignatureRole.storekeeper => 'Thủ kho',
+    SignatureRole.chiefAccountant => 'Kế toán trưởng',
+  };
+}
+
 /// Full form draft: header (ids + name snapshots) + line drafts.
 class ReceiptFormData extends Equatable {
   const ReceiptFormData({
@@ -118,10 +141,14 @@ class ReceiptFormData extends Equatable {
     this.attachedDocumentCount = 0,
     this.preparerUserId,
     this.preparerName,
+    this.preparerSignature,
     this.storekeeperUserId,
     this.storekeeperName,
+    this.storekeeperSignature,
     this.chiefAccountantUserId,
     this.chiefAccountantName,
+    this.chiefAccountantSignature,
+    this.delivererSignature,
     this.items = const [],
   });
 
@@ -144,51 +171,83 @@ class ReceiptFormData extends Equatable {
   final int attachedDocumentCount;
   final String? preparerUserId;
   final String? preparerName;
+  final String? preparerSignature;
   final String? storekeeperUserId;
   final String? storekeeperName;
+  final String? storekeeperSignature;
   final String? chiefAccountantUserId;
   final String? chiefAccountantName;
+  final String? chiefAccountantSignature;
+  final String? delivererSignature;
   final List<ReceiptItemFormData> items;
 
   num get totalAmount => items.fold<num>(0, (sum, item) => sum + item.amount);
 
+  /// Base64 PNG for [role], or null if not signed yet.
+  String? signatureOf(SignatureRole role) => switch (role) {
+    SignatureRole.preparer => preparerSignature,
+    SignatureRole.deliverer => delivererSignature,
+    SignatureRole.storekeeper => storekeeperSignature,
+    SignatureRole.chiefAccountant => chiefAccountantSignature,
+  };
+
+  ReceiptFormData withSignature(SignatureRole role, String? png) =>
+      switch (role) {
+        SignatureRole.preparer => copyWith(preparerSignature: png),
+        SignatureRole.deliverer => copyWith(delivererSignature: png),
+        SignatureRole.storekeeper => copyWith(storekeeperSignature: png),
+        SignatureRole.chiefAccountant => copyWith(
+          chiefAccountantSignature: png,
+        ),
+      };
+
+  /// Error keys for every signature still missing — used to gate submit.
+  List<String> get missingSignatureKeys => [
+    for (final r in SignatureRole.values)
+      if ((signatureOf(r) ?? '').isEmpty) r.errorKey,
+  ];
+
   ReceiptFormData copyWith({
     String? receiptNumber,
-    Object? receiptDate = _keep,
+    Object? receiptDate = keepField,
     String? organizationId,
     String? organizationName,
-    Object? departmentId = _keep,
-    Object? departmentName = _keep,
+    Object? departmentId = keepField,
+    Object? departmentName = keepField,
     String? debitAccount,
     String? creditAccount,
     String? delivererUserId,
     String? delivererName,
     String? referenceDocNumber,
-    Object? referenceDocDate = _keep,
+    Object? referenceDocDate = keepField,
     String? referenceDocIssuer,
     String? warehouseId,
     String? warehouseName,
-    Object? warehouseLocation = _keep,
+    Object? warehouseLocation = keepField,
     int? attachedDocumentCount,
-    Object? preparerUserId = _keep,
-    Object? preparerName = _keep,
-    Object? storekeeperUserId = _keep,
-    Object? storekeeperName = _keep,
-    Object? chiefAccountantUserId = _keep,
-    Object? chiefAccountantName = _keep,
+    Object? preparerUserId = keepField,
+    Object? preparerName = keepField,
+    Object? preparerSignature = keepField,
+    Object? storekeeperUserId = keepField,
+    Object? storekeeperName = keepField,
+    Object? storekeeperSignature = keepField,
+    Object? chiefAccountantUserId = keepField,
+    Object? chiefAccountantName = keepField,
+    Object? chiefAccountantSignature = keepField,
+    Object? delivererSignature = keepField,
     List<ReceiptItemFormData>? items,
   }) {
     return ReceiptFormData(
       receiptNumber: receiptNumber ?? this.receiptNumber,
-      receiptDate: identical(receiptDate, _keep)
+      receiptDate: identical(receiptDate, keepField)
           ? this.receiptDate
           : receiptDate as DateTime?,
       organizationId: organizationId ?? this.organizationId,
       organizationName: organizationName ?? this.organizationName,
-      departmentId: identical(departmentId, _keep)
+      departmentId: identical(departmentId, keepField)
           ? this.departmentId
           : departmentId as String?,
-      departmentName: identical(departmentName, _keep)
+      departmentName: identical(departmentName, keepField)
           ? this.departmentName
           : departmentName as String?,
       debitAccount: debitAccount ?? this.debitAccount,
@@ -196,35 +255,47 @@ class ReceiptFormData extends Equatable {
       delivererUserId: delivererUserId ?? this.delivererUserId,
       delivererName: delivererName ?? this.delivererName,
       referenceDocNumber: referenceDocNumber ?? this.referenceDocNumber,
-      referenceDocDate: identical(referenceDocDate, _keep)
+      referenceDocDate: identical(referenceDocDate, keepField)
           ? this.referenceDocDate
           : referenceDocDate as DateTime?,
       referenceDocIssuer: referenceDocIssuer ?? this.referenceDocIssuer,
       warehouseId: warehouseId ?? this.warehouseId,
       warehouseName: warehouseName ?? this.warehouseName,
-      warehouseLocation: identical(warehouseLocation, _keep)
+      warehouseLocation: identical(warehouseLocation, keepField)
           ? this.warehouseLocation
           : warehouseLocation as String?,
       attachedDocumentCount:
           attachedDocumentCount ?? this.attachedDocumentCount,
-      preparerUserId: identical(preparerUserId, _keep)
+      preparerUserId: identical(preparerUserId, keepField)
           ? this.preparerUserId
           : preparerUserId as String?,
-      preparerName: identical(preparerName, _keep)
+      preparerName: identical(preparerName, keepField)
           ? this.preparerName
           : preparerName as String?,
-      storekeeperUserId: identical(storekeeperUserId, _keep)
+      preparerSignature: identical(preparerSignature, keepField)
+          ? this.preparerSignature
+          : preparerSignature as String?,
+      storekeeperUserId: identical(storekeeperUserId, keepField)
           ? this.storekeeperUserId
           : storekeeperUserId as String?,
-      storekeeperName: identical(storekeeperName, _keep)
+      storekeeperName: identical(storekeeperName, keepField)
           ? this.storekeeperName
           : storekeeperName as String?,
-      chiefAccountantUserId: identical(chiefAccountantUserId, _keep)
+      storekeeperSignature: identical(storekeeperSignature, keepField)
+          ? this.storekeeperSignature
+          : storekeeperSignature as String?,
+      chiefAccountantUserId: identical(chiefAccountantUserId, keepField)
           ? this.chiefAccountantUserId
           : chiefAccountantUserId as String?,
-      chiefAccountantName: identical(chiefAccountantName, _keep)
+      chiefAccountantName: identical(chiefAccountantName, keepField)
           ? this.chiefAccountantName
           : chiefAccountantName as String?,
+      chiefAccountantSignature: identical(chiefAccountantSignature, keepField)
+          ? this.chiefAccountantSignature
+          : chiefAccountantSignature as String?,
+      delivererSignature: identical(delivererSignature, keepField)
+          ? this.delivererSignature
+          : delivererSignature as String?,
       items: items ?? this.items,
     );
   }
@@ -257,10 +328,14 @@ class ReceiptFormData extends Equatable {
       attachedDocumentCount: attachedDocumentCount,
       preparerUserId: preparerUserId,
       preparerName: preparerName,
+      preparerSignature: preparerSignature,
       storekeeperUserId: storekeeperUserId,
       storekeeperName: storekeeperName,
+      storekeeperSignature: storekeeperSignature,
       chiefAccountantUserId: chiefAccountantUserId,
       chiefAccountantName: chiefAccountantName,
+      chiefAccountantSignature: chiefAccountantSignature,
+      delivererSignature: delivererSignature,
     );
   }
 
@@ -285,10 +360,14 @@ class ReceiptFormData extends Equatable {
     attachedDocumentCount,
     preparerUserId,
     preparerName,
+    preparerSignature,
     storekeeperUserId,
     storekeeperName,
+    storekeeperSignature,
     chiefAccountantUserId,
     chiefAccountantName,
+    chiefAccountantSignature,
+    delivererSignature,
     items,
   ];
 }

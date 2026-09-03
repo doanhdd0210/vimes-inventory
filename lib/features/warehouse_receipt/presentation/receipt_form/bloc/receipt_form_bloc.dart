@@ -43,6 +43,7 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
        super(const ReceiptFormState(data: ReceiptFormData())) {
     on<ReceiptFormStarted>(_onStarted);
     on<ReceiptHeaderChanged>(_onHeaderChanged);
+    on<ReceiptSignatureChanged>(_onSignatureChanged);
     on<ReceiptItemAdded>(_onItemAdded);
     on<ReceiptItemRemoved>(_onItemRemoved);
     on<ReceiptItemChanged>(_onItemChanged);
@@ -165,6 +166,19 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
     );
   }
 
+  void _onSignatureChanged(
+    ReceiptSignatureChanged event,
+    Emitter<ReceiptFormState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        data: state.data.withSignature(event.role, event.pngBase64),
+        status: ReceiptFormStatus.editing,
+        clearErrorsFor: [event.role.errorKey],
+      ),
+    );
+  }
+
   void _onItemAdded(ReceiptItemAdded event, Emitter<ReceiptFormState> emit) {
     emit(
       state.copyWith(
@@ -252,7 +266,11 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
   ) async {
     final receipt = state.data.toEntity();
 
-    final localErrors = WarehouseReceiptRules.validate(receipt);
+    // Domain rules + the form-only rule that every signer must have signed.
+    final localErrors = {
+      ...WarehouseReceiptRules.validate(receipt),
+      for (final key in state.data.missingSignatureKeys) key: 'Thiếu chữ ký',
+    };
     if (localErrors.isNotEmpty) {
       emit(
         state.copyWith(status: ReceiptFormStatus.failure, errors: localErrors),

@@ -30,10 +30,14 @@ class WarehouseReceipt extends Equatable {
     this.attachedDocumentCount = 0,
     this.preparerUserId,
     this.preparerName,
+    this.preparerSignature,
     this.storekeeperUserId,
     this.storekeeperName,
+    this.storekeeperSignature,
     this.chiefAccountantUserId,
     this.chiefAccountantName,
+    this.chiefAccountantSignature,
+    this.delivererSignature,
     this.status = ReceiptStatus.posted,
     this.postedAt,
     this.createdAt,
@@ -79,6 +83,12 @@ class WarehouseReceipt extends Equatable {
   final String? chiefAccountantUserId; // Kế toán trưởng
   final String? chiefAccountantName;
 
+  /// Chữ ký (Ký, họ tên) — ảnh PNG mã hoá base64, chụp lúc lập phiếu.
+  final String? preparerSignature;
+  final String? delivererSignature;
+  final String? storekeeperSignature;
+  final String? chiefAccountantSignature;
+
   final ReceiptStatus status;
   final DateTime? postedAt;
   final DateTime? createdAt;
@@ -118,10 +128,14 @@ class WarehouseReceipt extends Equatable {
       attachedDocumentCount: attachedDocumentCount,
       preparerUserId: preparerUserId,
       preparerName: preparerName,
+      preparerSignature: preparerSignature,
       storekeeperUserId: storekeeperUserId,
       storekeeperName: storekeeperName,
+      storekeeperSignature: storekeeperSignature,
       chiefAccountantUserId: chiefAccountantUserId,
       chiefAccountantName: chiefAccountantName,
+      chiefAccountantSignature: chiefAccountantSignature,
+      delivererSignature: delivererSignature,
       status: status ?? this.status,
       postedAt: postedAt ?? this.postedAt,
       createdAt: createdAt ?? this.createdAt,
@@ -151,10 +165,14 @@ class WarehouseReceipt extends Equatable {
     attachedDocumentCount,
     preparerUserId,
     preparerName,
+    preparerSignature,
     storekeeperUserId,
     storekeeperName,
+    storekeeperSignature,
     chiefAccountantUserId,
     chiefAccountantName,
+    chiefAccountantSignature,
+    delivererSignature,
     status,
     postedAt,
     createdAt,

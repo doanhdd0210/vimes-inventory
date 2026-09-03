@@ -114,6 +114,9 @@ void main() {
         ),
       ),
     );
+    for (final role in SignatureRole.values) {
+      bloc.add(ReceiptSignatureChanged(role, 'sig-${role.name}'));
+    }
     await Future<void>.delayed(Duration.zero);
   }
 
@@ -159,6 +162,83 @@ void main() {
       expect(bloc.state.status, ReceiptFormStatus.success);
       expect(bloc.state.savedId, 'receipt-42');
       verify(() => create(any())).called(1);
+    },
+  );
+
+  blocTest<ReceiptFormBloc, ReceiptFormState>(
+    'submit is blocked until every signer has signed',
+    build: build,
+    act: (bloc) async {
+      bloc.add(const ReceiptFormStarted());
+      await Future<void>.delayed(Duration.zero);
+      bloc
+        ..add(
+          const ReceiptHeaderChanged(
+            receiptNumber: 'PN-9',
+            warehouseId: 'w1',
+            warehouseName: 'Kho A',
+            delivererUserId: 'u1',
+            delivererName: 'A',
+          ),
+        )
+        ..add(const ReceiptItemAdded());
+      await Future<void>.delayed(Duration.zero);
+      final rowId = bloc.state.data.items.single.rowId;
+      bloc
+        ..add(
+          ReceiptItemChanged(
+            ReceiptItemFormData(
+              rowId: rowId,
+              itemId: 'i1',
+              name: 'Thép',
+              unit: 'Cái',
+              quantityActual: 1,
+              unitPrice: 1000,
+            ),
+          ),
+        )
+        ..add(
+          const ReceiptSignatureChanged(SignatureRole.preparer, 'sig'),
+        )
+        ..add(const ReceiptSubmitted());
+      await Future<void>.delayed(Duration.zero);
+    },
+    verify: (bloc) {
+      expect(bloc.state.status, ReceiptFormStatus.failure);
+      expect(bloc.state.errorFor('preparerSignature'), isNull);
+      expect(bloc.state.errorFor('delivererSignature'), isNotNull);
+      expect(bloc.state.errorFor('storekeeperSignature'), isNotNull);
+      expect(bloc.state.errorFor('chiefAccountantSignature'), isNotNull);
+      verifyNever(() => create(any()));
+    },
+  );
+
+  blocTest<ReceiptFormBloc, ReceiptFormState>(
+    'picking one signer keeps the others (no cross-wipe)',
+    build: build,
+    act: (bloc) async {
+      bloc.add(const ReceiptFormStarted());
+      await Future<void>.delayed(Duration.zero);
+      bloc
+        ..add(
+          const ReceiptHeaderChanged(
+            storekeeperUserId: 'u1',
+            storekeeperName: 'Thủ kho A',
+          ),
+        )
+        ..add(
+          const ReceiptHeaderChanged(
+            chiefAccountantUserId: 'u1',
+            chiefAccountantName: 'Kế toán A',
+          ),
+        );
+      await Future<void>.delayed(Duration.zero);
+    },
+    verify: (bloc) {
+      expect(bloc.state.data.storekeeperName, 'Thủ kho A');
+      expect(bloc.state.data.chiefAccountantName, 'Kế toán A');
+      // organisation / bộ phận defaulted by ReceiptFormStarted survive too.
+      expect(bloc.state.data.organizationId, 'o1');
     },
   );
 

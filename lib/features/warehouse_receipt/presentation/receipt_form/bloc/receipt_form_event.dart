@@ -74,30 +74,34 @@ class ReceiptHeaderChanged extends ReceiptFormEvent {
     if (attachedDocumentCount != null) 'attachedDocumentCount',
   ];
 
+  /// Patch [data] with the fields this event carries. Every field the event
+  /// leaves `null` is passed to [ReceiptFormData.copyWith] as [keepField] so it
+  /// keeps its current value — otherwise touching one signer / date would wipe
+  /// every other nullable header field.
   ReceiptFormData apply(ReceiptFormData data) => data.copyWith(
     receiptNumber: receiptNumber,
-    receiptDate: receiptDate,
+    receiptDate: receiptDate ?? keepField,
     organizationId: organizationId,
     organizationName: organizationName,
-    departmentId: departmentId,
-    departmentName: departmentName,
+    departmentId: departmentId ?? keepField,
+    departmentName: departmentName ?? keepField,
     debitAccount: debitAccount,
     creditAccount: creditAccount,
     delivererUserId: delivererUserId,
     delivererName: delivererName,
     referenceDocNumber: referenceDocNumber,
-    referenceDocDate: referenceDocDate,
+    referenceDocDate: referenceDocDate ?? keepField,
     referenceDocIssuer: referenceDocIssuer,
     warehouseId: warehouseId,
     warehouseName: warehouseName,
-    warehouseLocation: warehouseLocation,
+    warehouseLocation: warehouseLocation ?? keepField,
     attachedDocumentCount: attachedDocumentCount,
-    preparerUserId: preparerUserId,
-    preparerName: preparerName,
-    storekeeperUserId: storekeeperUserId,
-    storekeeperName: storekeeperName,
-    chiefAccountantUserId: chiefAccountantUserId,
-    chiefAccountantName: chiefAccountantName,
+    preparerUserId: preparerUserId ?? keepField,
+    preparerName: preparerName ?? keepField,
+    storekeeperUserId: storekeeperUserId ?? keepField,
+    storekeeperName: storekeeperName ?? keepField,
+    chiefAccountantUserId: chiefAccountantUserId ?? keepField,
+    chiefAccountantName: chiefAccountantName ?? keepField,
   );
 
   @override
@@ -142,6 +146,17 @@ class ReceiptItemChanged extends ReceiptFormEvent {
 
   @override
   List<Object?> get props => [row];
+}
+
+/// A signer drew (or cleared) their signature. [pngBase64] is null when cleared.
+class ReceiptSignatureChanged extends ReceiptFormEvent {
+  const ReceiptSignatureChanged(this.role, this.pngBase64);
+
+  final SignatureRole role;
+  final String? pngBase64;
+
+  @override
+  List<Object?> get props => [role, pngBase64];
 }
 
 /// Move to [target] step. Moving forward validates every field owned by the

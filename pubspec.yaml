@@ -46,6 +46,7 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_secure_storage: ^11.0.0
   firebase_auth: ^6.6.1
+  signature: ^5.5.0
 
 dev_dependencies:
   flutter_test:

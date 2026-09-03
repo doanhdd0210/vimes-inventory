@@ -22,6 +22,7 @@ import '../../features/stock/domain/repositories/stock_repository.dart';
 import '../../features/warehouse_receipt/data/datasources/warehouse_receipt_data_source.dart';
 import '../../features/warehouse_receipt/data/datasources/warehouse_receipt_in_memory_data_source.dart';
 import '../../features/warehouse_receipt/data/repositories/warehouse_receipt_repository_impl.dart';
+import '../../features/warehouse_receipt/data/sample_receipt_seeder.dart';
 import '../../features/warehouse_receipt/domain/repositories/warehouse_receipt_repository.dart';
 import '../../features/warehouse_receipt/domain/usecases/create_warehouse_receipt.dart';
 import '../../features/warehouse_receipt/domain/usecases/get_warehouse_receipts.dart';
@@ -69,9 +70,13 @@ void _initAuth({required bool firebaseEnabled}) {
   sl.registerLazySingleton<AuthCubit>(
     () => AuthCubit(
       sl(),
-      // Firestore seeding needs an authenticated request → run it on sign-in.
+      // Firestore seeding needs an authenticated request → run it on sign-in:
+      // master data first, then a couple of sample phiếu on top of it.
       onAuthenticated: firebaseEnabled
-          ? () => sl<MasterDataSeeder>().seedIfEmpty()
+          ? () async {
+              await sl<MasterDataSeeder>().seedIfEmpty();
+              await sl<SampleReceiptSeeder>().seedIfEmpty();
+            }
           : null,
     ),
   );
@@ -242,6 +247,13 @@ void _initWarehouseReceipt({required bool firebaseEnabled}) {
     () => firebaseEnabled
         ? WarehouseReceiptFirestoreDataSource(sl())
         : WarehouseReceiptInMemoryDataSource(sl<InMemoryStockStore>()),
+  );
+
+  // Demo data: two sample phiếu so the list / tồn kho / thẻ kho aren't empty on
+  // first open. Firebase runs it post-auth (see _initAuth); offline runs it from
+  // bootstrap.
+  sl.registerLazySingleton(
+    () => SampleReceiptSeeder(sl<WarehouseReceiptRepository>()),
   );
 }
 

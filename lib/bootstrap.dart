@@ -9,6 +9,7 @@ import 'core/flavors/flavor.dart';
 import 'core/flavors/flavor_config.dart';
 import 'core/helpers/app_logger.dart';
 import 'features/auth/presentation/login/bloc/auth_cubit.dart';
+import 'features/warehouse_receipt/data/sample_receipt_seeder.dart';
 
 /// Single composition root shared by every flavor entry point.
 Future<void> bootstrap(Flavor flavor) async {
@@ -29,6 +30,12 @@ Future<void> bootstrap(Flavor flavor) async {
       // Instantiate the auth holder now so it is listening before the router
       // reads it for the first redirect.
       sl<AuthCubit>();
+
+      // Offline has no auth gate, so seed the sample phiếu here. (With Firebase
+      // this runs post-sign-in via AuthCubit.onAuthenticated.)
+      if (!firebaseReady) {
+        await sl<SampleReceiptSeeder>().seedIfEmpty();
+      }
 
       FlutterError.onError = (details) {
         AppLogger.instance.e(

@@ -5,9 +5,11 @@ import 'flavor.dart';
 /// (`main_dev.dart`, `main_staging.dart`, `main_prod.dart`) before `runApp`.
 class FlavorConfig {
   /// Kill-switch: when `true` every flavor runs on the in-memory datasources
-  /// regardless of the per-flavor setting. Set back to `true` to demo offline.
-  /// Firebase project: vimes-inventory-doanhdd.
-  static const bool firebaseTemporarilyDisabled = false;
+  /// (FakeAuth + seeded data) regardless of the per-flavor setting, so the app
+  /// runs with zero setup. Set to `false` to use the real Firebase project
+  /// `vimes-inventory-doanhdd` (Auth + Cloud Firestore) — wiring is complete,
+  /// see docs/firebase_setup.md.
+  static const bool firebaseTemporarilyDisabled = true;
 
   FlavorConfig._({
     required this.flavor,

@@ -38,7 +38,8 @@ void main() {
       ((androidClient['api_key'] as List).first as Map)['current_key']
           as String;
   final androidPackage =
-      ((androidClient['client_info'] as Map)['android_client_info'] as Map)['package_name']
+      ((androidClient['client_info'] as Map)['android_client_info']
+              as Map)['package_name']
           as String;
 
   final p = _plist(plist.readAsStringSync());

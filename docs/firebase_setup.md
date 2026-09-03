@@ -1,23 +1,27 @@
 # Bật Firebase thật
 
-App hiện chạy **offline** (`FlavorConfig.firebaseTemporarilyDisabled = true`):
+App mặc định chạy **offline** (`FlavorConfig.firebaseTemporarilyDisabled = true`):
 in-memory datasources + `FakeAuthDataSource` (tài khoản demo
 `admin@vimes.local` / `123456`). Mọi luồng — đăng nhập, nhập phiếu, ghi sổ tồn
 kho, thẻ kho — chạy đủ mà không cần Firebase.
 
-Để chuyển sang Firebase thật:
+Repo **đã đi qua toàn bộ các bước dưới** cho project `vimes-inventory-doanhdd`:
+`lib/firebase_options.dart`, `android/app/google-services.json`,
+`ios/Runner/GoogleService-Info.plist` đã commit sẵn, `firestore.rules` /
+`firestore.indexes.json` đã deploy, và luồng thật đã verify trên máy thật + iOS
+simulator. Nếu dùng lại project đó thì **chỉ cần bước 3 (tạo tài khoản) + bước 4
+(bật cờ)**. Các bước 1–2 chỉ cần khi trỏ sang một project Firebase khác.
 
-## 1. Đăng nhập lại Firebase CLI (token trong máy đã hết hạn)
+## 1. Đăng nhập Firebase CLI
 
 ```bash
-firebase login --reauth
+firebase login          # hoặc: firebase login --reauth nếu token đã hết hạn
 ```
 
-## 2. Sinh `lib/firebase_options.dart`
+## 2. Sinh `lib/firebase_options.dart` (chỉ khi đổi project)
 
 ```bash
 dart pub global activate flutterfire_cli
-cd /Users/doducdoanh/StudioProjects/vimes_inventory
 flutterfire configure \
   --project=<firebase-project-id> \
   --out=lib/firebase_options.dart \
@@ -25,8 +29,8 @@ flutterfire configure \
   --yes
 ```
 
-Lệnh này cũng tạo `android/app/google-services.json` và
-`ios/Runner/GoogleService-Info.plist` (đã có mẫu ignore trong `.gitignore`).
+Lệnh này cũng ghi đè `android/app/google-services.json` và
+`ios/Runner/GoogleService-Info.plist`.
 
 ## 3. Bật Authentication + Firestore trên Firebase Console
 

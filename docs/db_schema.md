@@ -349,4 +349,9 @@ Giới hạn: 1 transaction ≤ 500 ghi; 1 phiếu N dòng = `2 + 2N` ghi, `1 + 
 | `warehouse_receipts` + `warehouse_receipt_items` | ✅ embedded doc, header **tham chiếu id** (organizationId / departmentId / warehouseId / delivererUserId / preparer·storekeeper·chiefAccountant UserId) + tên snapshot. Form dùng **dropdown**, dòng vật tư chọn `Item` → tự điền tên/mã/ĐVT/đơn giá |
 | `stock_ledger`, `inventory_stock` | ✅ feature `stock`. Lưu phiếu → `runTransaction` ghi phiếu + `receipt_numbers` + `stock_ledger` + `inventory_stock` (bình quân gia quyền, idempotent). Màn "Tồn kho" + "Thẻ kho" xem được. Đường offline dùng `InMemoryStockStore` chung |
 
-Chưa làm: đăng nhập (rules đang giả định `isSignedIn()`), sửa/xoá phiếu, phiếu xuất kho.
+Đã có: đăng nhập (Firebase Auth email/password, có `FakeAuthDataSource` cho offline;
+router redirect `/login` khi chưa auth).
+
+Ngoài phạm vi bài test: sửa/xoá phiếu, phiếu xuất kho, rule phân quyền theo `role`
+(hiện Firestore chạy DEMO rule `allow read, write: if request.auth != null`; bản
+rule theo `role` để sẵn dạng comment trong `firestore.rules`).

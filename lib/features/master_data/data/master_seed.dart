@@ -26,6 +26,7 @@ class MasterSeed {
   static const userKeeper = 'user-thukho';
   static const userAccountant = 'user-ketoan';
   static const userDeliver = 'user-giaohang';
+  static const userReviewer = 'user-reviewer';
 
   static const whMain = 'wh-chinh';
   static const whSpare = 'wh-phu';
@@ -78,8 +79,19 @@ class MasterSeed {
       organizationId: orgId,
       departmentId: dptWarehouse,
       username: 'admin',
+      email: 'admin@vimes.local',
       fullName: 'Đỗ Đức Doanh',
       position: 'Quản trị hệ thống',
+      role: UserRole.admin,
+    ),
+    const AppUserModel(
+      id: userReviewer,
+      organizationId: orgId,
+      departmentId: dptWarehouse,
+      username: 'reviewer',
+      email: 'reviewer@vimes.local',
+      fullName: 'Người chấm bài',
+      position: 'Quản trị',
       role: UserRole.admin,
     ),
     const AppUserModel(
@@ -87,6 +99,7 @@ class MasterSeed {
       organizationId: orgId,
       departmentId: dptWarehouse,
       username: 'thukho',
+      email: 'thukho@vimes.local',
       fullName: 'Nguyễn Văn Kho',
       position: 'Thủ kho',
       role: UserRole.warehouseKeeper,
@@ -96,6 +109,7 @@ class MasterSeed {
       organizationId: orgId,
       departmentId: dptAccounting,
       username: 'ketoan',
+      email: 'ketoan@vimes.local',
       fullName: 'Trần Thị Toán',
       position: 'Kế toán trưởng',
       role: UserRole.accountant,
@@ -105,6 +119,7 @@ class MasterSeed {
       organizationId: orgId,
       departmentId: dptWarehouse,
       username: 'giaohang',
+      email: 'giaohang@vimes.local',
       fullName: 'Lê Văn Giao',
       position: 'Nhân viên giao nhận',
       role: UserRole.staff,

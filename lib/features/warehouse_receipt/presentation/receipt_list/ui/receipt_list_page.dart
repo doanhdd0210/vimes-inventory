@@ -37,6 +37,7 @@ class _ReceiptListView extends StatelessWidget {
         titleSpacing: 0,
         title: Row(
           children: [
+            const SizedBox(width: 16),
             const VimesLogo(size: 26),
             const SizedBox(width: 10),
             Text('Phiếu nhập kho', style: context.texts.titleLarge),

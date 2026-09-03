@@ -19,7 +19,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _email = TextEditingController(
     text: _firebaseOn ? '' : 'admin@vimes.local',
-  );
+  ); //TODO BYPASS LOGIN FOR TEST
   final _password = TextEditingController(text: _firebaseOn ? '' : '123456');
   bool _obscure = true;
 

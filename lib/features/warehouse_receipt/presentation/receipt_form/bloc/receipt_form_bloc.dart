@@ -97,27 +97,34 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
       uoms: uoms.getOrElse(() => const []),
     );
 
-    // Đơn vị / bộ phận lấy từ user đăng nhập; nếu không tìm thấy thì fallback
-    // về đơn vị đầu tiên.
-    final uid = _auth.currentAccount?.uid;
-    final me = options.users
-        .where((u) => u.id == uid)
-        .cast<AppUser?>()
-        .firstOrNull;
+    // Đơn vị / bộ phận lấy từ user đăng nhập. Khớp theo UID, và cả theo email
+    // (Firebase Auth UID khác id nhân sự trong danh mục). Không khớp được thì
+    // fallback về đơn vị đầu tiên.
+    final account = _auth.currentAccount;
+    final email = account?.email?.toLowerCase();
+    final me = options.users.firstWhereOrNull(
+      (u) =>
+          u.id == account?.uid ||
+          (email != null && u.email?.toLowerCase() == email),
+    );
+
     final org = me == null
         ? (options.organizations.isNotEmpty
               ? options.organizations.first
               : null)
-        : options.organizations
-              .where((o) => o.id == me.organizationId)
-              .cast<Organization?>()
-              .firstOrNull;
-    final dept = me?.departmentId == null
-        ? null
-        : options.departments
-              .where((d) => d.id == me!.departmentId)
-              .cast<Department?>()
-              .firstOrNull;
+        : options.organizations.firstWhereOrNull(
+            (o) => o.id == me.organizationId,
+          );
+
+    // Bộ phận: của chính user; nếu chưa có thì lấy bộ phận đầu tiên của đơn vị
+    // để trường "Bộ phận" không bị trống.
+    final dept =
+        options.departments.firstWhereOrNull((d) => d.id == me?.departmentId) ??
+        (org == null
+            ? null
+            : options.departments.firstWhereOrNull(
+                (d) => d.organizationId == org.id,
+              ));
 
     var data = state.data.copyWith(
       receiptDate: state.data.receiptDate ?? DateTime.now(),

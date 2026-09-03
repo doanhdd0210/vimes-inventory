@@ -22,7 +22,7 @@ class VimesApp extends StatelessWidget {
         builder: (context, themeMode) {
           return MaterialApp.router(
             title: FlavorConfig.instance.appName,
-            debugShowCheckedModeBanner: !FlavorConfig.instance.isProd,
+            debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: themeMode,

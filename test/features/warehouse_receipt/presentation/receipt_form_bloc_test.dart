@@ -163,6 +163,42 @@ void main() {
   );
 
   blocTest<ReceiptFormBloc, ReceiptFormState>(
+    'step 0 → 1 is blocked until số phiếu / kho / người giao are set',
+    build: build,
+    act: (bloc) async {
+      bloc.add(const ReceiptFormStarted());
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const ReceiptStepRequested(1));
+    },
+    verify: (bloc) {
+      expect(bloc.state.step, 0);
+      expect(bloc.state.errorFor('receiptNumber'), isNotNull);
+      expect(bloc.state.errorFor('warehouseId'), isNotNull);
+    },
+  );
+
+  blocTest<ReceiptFormBloc, ReceiptFormState>(
+    'step 0 → 1 passes once step-0 fields are valid',
+    build: build,
+    act: (bloc) async {
+      bloc.add(const ReceiptFormStarted());
+      await Future<void>.delayed(Duration.zero);
+      bloc
+        ..add(
+          const ReceiptHeaderChanged(
+            receiptNumber: 'PN-1',
+            warehouseId: 'w1',
+            warehouseName: 'Kho A',
+            delivererUserId: 'u1',
+            delivererName: 'A',
+          ),
+        )
+        ..add(const ReceiptStepRequested(1));
+    },
+    verify: (bloc) => expect(bloc.state.step, 1),
+  );
+
+  blocTest<ReceiptFormBloc, ReceiptFormState>(
     'a ServerFailure surfaces as submitError',
     build: build,
     setUp: () => when(

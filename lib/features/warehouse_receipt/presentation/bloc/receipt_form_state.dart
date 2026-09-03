@@ -8,12 +8,18 @@ class ReceiptFormState extends Equatable {
     this.options = const ReceiptFormOptions(),
     this.errors = const {},
     this.status = ReceiptFormStatus.loading,
+    this.step = 0,
     this.savedId,
     this.submitError,
   });
 
+  static const int lastStep = 2;
+
   final ReceiptFormData data;
   final ReceiptFormOptions options;
+
+  /// 0 = Thông tin phiếu · 1 = Vật tư · 2 = Tổng hợp & chữ ký.
+  final int step;
 
   /// field key → message. Keys: `receiptNumber`, `organizationId`,
   /// `delivererUserId`, `warehouseId`, `attachedDocumentCount`, `items`,
@@ -36,6 +42,7 @@ class ReceiptFormState extends Equatable {
     ReceiptFormOptions? options,
     Map<String, String>? errors,
     ReceiptFormStatus? status,
+    int? step,
     String? savedId,
     String? submitError,
     List<String>? clearErrorsFor,
@@ -56,6 +63,7 @@ class ReceiptFormState extends Equatable {
       options: options ?? this.options,
       errors: nextErrors,
       status: status ?? this.status,
+      step: step ?? this.step,
       savedId: savedId ?? this.savedId,
       submitError: submitError,
     );
@@ -67,6 +75,7 @@ class ReceiptFormState extends Equatable {
     options,
     errors,
     status,
+    step,
     savedId,
     submitError,
   ];

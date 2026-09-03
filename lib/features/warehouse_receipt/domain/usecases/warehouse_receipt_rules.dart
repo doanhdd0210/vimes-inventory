@@ -5,6 +5,14 @@ import '../entities/warehouse_receipt.dart';
 class WarehouseReceiptRules {
   const WarehouseReceiptRules._();
 
+  /// Which wizard step owns a given error key.
+  /// 0 = Thông tin phiếu · 1 = Vật tư · 2 = Tổng hợp.
+  static int stepOfKey(String key) {
+    if (key.startsWith('items')) return 1;
+    if (key == 'attachedDocumentCount') return 2;
+    return 0;
+  }
+
   static Map<String, String> validate(WarehouseReceipt receipt) {
     final errors = <String, String>{};
 

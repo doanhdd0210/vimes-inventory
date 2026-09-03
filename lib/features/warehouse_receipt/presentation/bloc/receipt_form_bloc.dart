@@ -46,6 +46,7 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
     on<ReceiptItemAdded>(_onItemAdded);
     on<ReceiptItemRemoved>(_onItemRemoved);
     on<ReceiptItemChanged>(_onItemChanged);
+    on<ReceiptStepRequested>(_onStepRequested);
     on<ReceiptSubmitted>(_onSubmitted);
   }
 
@@ -202,6 +203,38 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
         ),
         status: ReceiptFormStatus.editing,
         clearRowErrors: true,
+      ),
+    );
+  }
+
+  void _onStepRequested(
+    ReceiptStepRequested event,
+    Emitter<ReceiptFormState> emit,
+  ) {
+    final target = event.target.clamp(0, ReceiptFormState.lastStep);
+
+    // Going back (or staying) is free.
+    if (target <= state.step) {
+      emit(state.copyWith(step: target, status: ReceiptFormStatus.editing));
+      return;
+    }
+
+    // Going forward: every field owned by a step we're leaving must be valid.
+    final all = WarehouseReceiptRules.validate(state.data.toEntity());
+    final blocking = <String, String>{
+      for (final e in all.entries)
+        if (WarehouseReceiptRules.stepOfKey(e.key) < target) e.key: e.value,
+    };
+    if (blocking.isNotEmpty) {
+      emit(state.copyWith(errors: blocking, status: ReceiptFormStatus.failure));
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        step: target,
+        errors: const {},
+        status: ReceiptFormStatus.editing,
       ),
     );
   }

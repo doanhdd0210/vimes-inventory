@@ -144,6 +144,17 @@ class ReceiptItemChanged extends ReceiptFormEvent {
   List<Object?> get props => [row];
 }
 
+/// Move to [target] step. Moving forward validates every field owned by the
+/// steps being left; moving back is unconditional.
+class ReceiptStepRequested extends ReceiptFormEvent {
+  const ReceiptStepRequested(this.target);
+
+  final int target;
+
+  @override
+  List<Object?> get props => [target];
+}
+
 class ReceiptSubmitted extends ReceiptFormEvent {
   const ReceiptSubmitted();
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vimes_inventory/features/warehouse_receipt/domain/entities/warehouse_receipt.dart';
 
 import '../../../fixtures/warehouse_receipt_fixtures.dart';
 
@@ -18,11 +19,18 @@ void main() {
     expect(receipt.totalAmount, 350);
   });
 
-  test('copyWith replaces only the given fields', () {
+  test('copyWith only touches lifecycle fields', () {
     final receipt = receiptFixture();
-    final updated = receipt.copyWith(warehouseName: 'Kho B');
-    expect(updated.warehouseName, 'Kho B');
-    expect(updated.receiptNumber, receipt.receiptNumber);
-    expect(updated.items, receipt.items);
+    final posted = receipt.copyWith(
+      id: 'new-id',
+      status: ReceiptStatus.posted,
+      postedAt: DateTime(2026, 3, 1),
+    );
+    expect(posted.id, 'new-id');
+    expect(posted.status, ReceiptStatus.posted);
+    expect(posted.postedAt, DateTime(2026, 3, 1));
+    expect(posted.receiptNumber, receipt.receiptNumber);
+    expect(posted.warehouseName, receipt.warehouseName);
+    expect(posted.items, receipt.items);
   });
 }

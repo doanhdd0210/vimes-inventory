@@ -45,6 +45,45 @@ class ReceiptField extends StatelessWidget {
   }
 }
 
+/// Labelled dropdown backed by the bloc's option lists.
+class ReceiptDropdown<T> extends StatelessWidget {
+  const ReceiptDropdown({
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.labelOf,
+    required this.onChanged,
+    this.errorText,
+    this.enabled = true,
+    super.key,
+  });
+
+  final String label;
+  final T? value;
+  final List<T> items;
+  final String Function(T item) labelOf;
+  final ValueChanged<T?> onChanged;
+  final String? errorText;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<T>(
+      initialValue: value,
+      isExpanded: true,
+      decoration: InputDecoration(labelText: label, errorText: errorText),
+      items: [
+        for (final item in items)
+          DropdownMenuItem<T>(
+            value: item,
+            child: Text(labelOf(item), overflow: TextOverflow.ellipsis),
+          ),
+      ],
+      onChanged: enabled ? onChanged : null,
+    );
+  }
+}
+
 /// Allows digits plus one separator (`.` or `,`) for quantity / price entry.
 class DecimalTextInputFormatter extends TextInputFormatter {
   DecimalTextInputFormatter({this.decimalRange = 3});

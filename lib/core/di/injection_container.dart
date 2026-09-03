@@ -10,6 +10,9 @@ import '../../features/master_data/domain/entities/item_category.dart';
 import '../../features/master_data/domain/entities/organization.dart';
 import '../../features/master_data/domain/entities/unit_of_measure.dart';
 import '../../features/master_data/domain/entities/warehouse.dart';
+import '../../features/stock/data/in_memory_stock_store.dart';
+import '../../features/stock/data/stock_data_source.dart';
+import '../../features/stock/domain/repositories/stock_repository.dart';
 import '../../features/warehouse_receipt/data/datasources/warehouse_receipt_data_source.dart';
 import '../../features/warehouse_receipt/data/datasources/warehouse_receipt_in_memory_data_source.dart';
 import '../../features/warehouse_receipt/data/repositories/warehouse_receipt_repository_impl.dart';
@@ -41,7 +44,21 @@ Future<void> configureDependencies({bool? useFirebase}) async {
 
   await _initCore(firebaseEnabled: firebaseEnabled);
   _initMasterData(firebaseEnabled: firebaseEnabled);
+  _initStock(firebaseEnabled: firebaseEnabled);
   _initWarehouseReceipt(firebaseEnabled: firebaseEnabled);
+}
+
+void _initStock({required bool firebaseEnabled}) {
+  // Shared mutable store for the offline path (posted by the receipt datasource,
+  // read by the stock screens).
+  sl.registerLazySingleton<InMemoryStockStore>(() => InMemoryStockStore());
+
+  sl.registerLazySingleton<StockDataSource>(
+    () => firebaseEnabled
+        ? StockFirestoreDataSource(sl())
+        : StockInMemoryDataSource(sl()),
+  );
+  sl.registerLazySingleton<StockRepository>(() => StockRepositoryImpl(sl()));
 }
 
 Future<void> _initCore({required bool firebaseEnabled}) async {
@@ -170,7 +187,17 @@ void _initMasterData({required bool firebaseEnabled}) {
 
 void _initWarehouseReceipt({required bool firebaseEnabled}) {
   // Presentation (ViewModel)
-  sl.registerFactory(() => ReceiptFormBloc(createWarehouseReceipt: sl()));
+  sl.registerFactory(
+    () => ReceiptFormBloc(
+      createWarehouseReceipt: sl(),
+      organizations: sl<CrudRepository<Organization>>(),
+      departments: sl<CrudRepository<Department>>(),
+      warehouses: sl<CrudRepository<Warehouse>>(),
+      users: sl<CrudRepository<AppUser>>(),
+      items: sl<CrudRepository<Item>>(),
+      uoms: sl<CrudRepository<UnitOfMeasure>>(),
+    ),
+  );
   sl.registerFactory(() => ReceiptListBloc(getWarehouseReceipts: sl()));
 
   // Domain
@@ -184,7 +211,7 @@ void _initWarehouseReceipt({required bool firebaseEnabled}) {
   sl.registerLazySingleton<WarehouseReceiptDataSource>(
     () => firebaseEnabled
         ? WarehouseReceiptFirestoreDataSource(sl())
-        : WarehouseReceiptInMemoryDataSource(),
+        : WarehouseReceiptInMemoryDataSource(sl<InMemoryStockStore>()),
   );
 }
 

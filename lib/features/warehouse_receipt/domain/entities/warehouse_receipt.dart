@@ -2,32 +2,40 @@ import 'package:equatable/equatable.dart';
 
 import 'warehouse_receipt_item.dart';
 
-enum ReceiptStatus { draft, posted }
+enum ReceiptStatus { draft, posted, cancelled }
 
-/// A goods-receipt note (Phiếu nhập kho — Mẫu 01‑VT): header fields plus the
-/// list of received items. `totalAmount` / `totalAmountInWords` are derived and
-/// never trusted from storage.
+/// A goods-receipt note (Phiếu nhập kho — Mẫu 01‑VT). Master data is referenced
+/// by id with a display-name snapshot alongside, so a renamed master never
+/// rewrites history. `totalAmount` is derived.
 class WarehouseReceipt extends Equatable {
   const WarehouseReceipt({
     required this.id,
     required this.receiptNumber,
     required this.receiptDate,
-    required this.delivererName,
+    required this.organizationId,
+    required this.organizationName,
+    required this.warehouseId,
     required this.warehouseName,
+    required this.delivererUserId,
+    required this.delivererName,
     required this.items,
-    this.unitName,
-    this.department,
+    this.departmentId,
+    this.departmentName,
+    this.warehouseLocation,
     this.debitAccount,
     this.creditAccount,
     this.referenceDocNumber,
     this.referenceDocDate,
     this.referenceDocIssuer,
-    this.warehouseLocation,
     this.attachedDocumentCount = 0,
+    this.preparerUserId,
     this.preparerName,
+    this.storekeeperUserId,
     this.storekeeperName,
+    this.chiefAccountantUserId,
     this.chiefAccountantName,
     this.status = ReceiptStatus.posted,
+    this.postedAt,
     this.createdAt,
     this.updatedAt,
   });
@@ -40,30 +48,39 @@ class WarehouseReceipt extends Equatable {
   /// Ngày … tháng … năm.
   final DateTime receiptDate;
 
-  final String? unitName; // Đơn vị
-  final String? department; // Bộ phận
+  final String organizationId; // Đơn vị
+  final String organizationName;
+  final String? departmentId; // Bộ phận
+  final String? departmentName;
+
   final String? debitAccount; // Nợ
   final String? creditAccount; // Có
 
+  /// Nhập tại kho.
+  final String warehouseId;
+  final String warehouseName;
+  final String? warehouseLocation; // địa điểm
+
   /// Họ và tên người giao.
+  final String delivererUserId;
   final String delivererName;
 
   final String? referenceDocNumber; // "Theo … số …"
   final DateTime? referenceDocDate; // "… ngày …"
   final String? referenceDocIssuer; // "… của …"
 
-  /// Nhập tại kho.
-  final String warehouseName;
-  final String? warehouseLocation; // địa điểm
-
   /// Số chứng từ gốc kèm theo.
   final int attachedDocumentCount;
 
-  final String? preparerName; // Người lập phiếu
-  final String? storekeeperName; // Thủ kho
-  final String? chiefAccountantName; // Kế toán trưởng
+  final String? preparerUserId; // Người lập phiếu
+  final String? preparerName;
+  final String? storekeeperUserId; // Thủ kho
+  final String? storekeeperName;
+  final String? chiefAccountantUserId; // Kế toán trưởng
+  final String? chiefAccountantName;
 
   final ReceiptStatus status;
+  final DateTime? postedAt;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -74,48 +91,39 @@ class WarehouseReceipt extends Equatable {
 
   WarehouseReceipt copyWith({
     String? id,
-    String? receiptNumber,
-    DateTime? receiptDate,
-    String? delivererName,
-    String? warehouseName,
-    List<WarehouseReceiptItem>? items,
-    String? unitName,
-    String? department,
-    String? debitAccount,
-    String? creditAccount,
-    String? referenceDocNumber,
-    DateTime? referenceDocDate,
-    String? referenceDocIssuer,
-    String? warehouseLocation,
-    int? attachedDocumentCount,
-    String? preparerName,
-    String? storekeeperName,
-    String? chiefAccountantName,
     ReceiptStatus? status,
+    DateTime? postedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return WarehouseReceipt(
       id: id ?? this.id,
-      receiptNumber: receiptNumber ?? this.receiptNumber,
-      receiptDate: receiptDate ?? this.receiptDate,
-      delivererName: delivererName ?? this.delivererName,
-      warehouseName: warehouseName ?? this.warehouseName,
-      items: items ?? this.items,
-      unitName: unitName ?? this.unitName,
-      department: department ?? this.department,
-      debitAccount: debitAccount ?? this.debitAccount,
-      creditAccount: creditAccount ?? this.creditAccount,
-      referenceDocNumber: referenceDocNumber ?? this.referenceDocNumber,
-      referenceDocDate: referenceDocDate ?? this.referenceDocDate,
-      referenceDocIssuer: referenceDocIssuer ?? this.referenceDocIssuer,
-      warehouseLocation: warehouseLocation ?? this.warehouseLocation,
-      attachedDocumentCount:
-          attachedDocumentCount ?? this.attachedDocumentCount,
-      preparerName: preparerName ?? this.preparerName,
-      storekeeperName: storekeeperName ?? this.storekeeperName,
-      chiefAccountantName: chiefAccountantName ?? this.chiefAccountantName,
+      receiptNumber: receiptNumber,
+      receiptDate: receiptDate,
+      organizationId: organizationId,
+      organizationName: organizationName,
+      warehouseId: warehouseId,
+      warehouseName: warehouseName,
+      delivererUserId: delivererUserId,
+      delivererName: delivererName,
+      items: items,
+      departmentId: departmentId,
+      departmentName: departmentName,
+      warehouseLocation: warehouseLocation,
+      debitAccount: debitAccount,
+      creditAccount: creditAccount,
+      referenceDocNumber: referenceDocNumber,
+      referenceDocDate: referenceDocDate,
+      referenceDocIssuer: referenceDocIssuer,
+      attachedDocumentCount: attachedDocumentCount,
+      preparerUserId: preparerUserId,
+      preparerName: preparerName,
+      storekeeperUserId: storekeeperUserId,
+      storekeeperName: storekeeperName,
+      chiefAccountantUserId: chiefAccountantUserId,
+      chiefAccountantName: chiefAccountantName,
       status: status ?? this.status,
+      postedAt: postedAt ?? this.postedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -126,21 +134,29 @@ class WarehouseReceipt extends Equatable {
     id,
     receiptNumber,
     receiptDate,
-    unitName,
-    department,
+    organizationId,
+    organizationName,
+    departmentId,
+    departmentName,
     debitAccount,
     creditAccount,
+    warehouseId,
+    warehouseName,
+    warehouseLocation,
+    delivererUserId,
     delivererName,
     referenceDocNumber,
     referenceDocDate,
     referenceDocIssuer,
-    warehouseName,
-    warehouseLocation,
     attachedDocumentCount,
+    preparerUserId,
     preparerName,
+    storekeeperUserId,
     storekeeperName,
+    chiefAccountantUserId,
     chiefAccountantName,
     status,
+    postedAt,
     createdAt,
     updatedAt,
     items,

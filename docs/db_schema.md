@@ -345,6 +345,8 @@ Giới hạn: 1 transaction ≤ 500 ghi; 1 phiếu N dòng = `2 + 2N` ghi, `1 + 
 
 | Bảng | Code |
 |---|---|
-| `warehouse_receipts` + `warehouse_receipt_items` | ✅ (đang là embedded doc; header field còn để text cho đơn vị/bộ phận/kho/người giao) |
-| `organizations`, `departments`, `users`, `warehouses`, `item_categories`, `units_of_measure`, `items` | ⬜ mới thiết kế — cần thêm feature danh mục + đổi phiếu sang tham chiếu id |
-| `stock_ledger`, `inventory_stock` | ⬜ thiết kế xong — cần thêm bước ghi sổ trong transaction lưu phiếu |
+| `organizations`, `departments`, `users`, `warehouses`, `item_categories`, `units_of_measure`, `items` | ✅ feature `master_data` — generic `CrudRepository<E>` + Firestore / in-memory + seed. Màn "Danh mục" xem được |
+| `warehouse_receipts` + `warehouse_receipt_items` | ✅ embedded doc, header **tham chiếu id** (organizationId / departmentId / warehouseId / delivererUserId / preparer·storekeeper·chiefAccountant UserId) + tên snapshot. Form dùng **dropdown**, dòng vật tư chọn `Item` → tự điền tên/mã/ĐVT/đơn giá |
+| `stock_ledger`, `inventory_stock` | ✅ feature `stock`. Lưu phiếu → `runTransaction` ghi phiếu + `receipt_numbers` + `stock_ledger` + `inventory_stock` (bình quân gia quyền, idempotent). Màn "Tồn kho" + "Thẻ kho" xem được. Đường offline dùng `InMemoryStockStore` chung |
+
+Chưa làm: đăng nhập (rules đang giả định `isSignedIn()`), sửa/xoá phiếu, phiếu xuất kho.

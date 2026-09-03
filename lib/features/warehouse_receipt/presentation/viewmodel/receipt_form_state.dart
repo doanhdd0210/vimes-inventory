@@ -1,27 +1,30 @@
 part of 'receipt_form_bloc.dart';
 
-enum ReceiptFormStatus { editing, submitting, success, failure }
+enum ReceiptFormStatus { loading, editing, submitting, success, failure }
 
 class ReceiptFormState extends Equatable {
   const ReceiptFormState({
     required this.data,
+    this.options = const ReceiptFormOptions(),
     this.errors = const {},
-    this.status = ReceiptFormStatus.editing,
+    this.status = ReceiptFormStatus.loading,
     this.savedId,
     this.submitError,
   });
 
   final ReceiptFormData data;
+  final ReceiptFormOptions options;
 
-  /// field key → message. Keys: `receiptNumber`, `delivererName`,
-  /// `warehouseName`, `attachedDocumentCount`, `items`, `items[i].<col>`.
+  /// field key → message. Keys: `receiptNumber`, `organizationId`,
+  /// `delivererUserId`, `warehouseId`, `attachedDocumentCount`, `items`,
+  /// `items[i].<col>`.
   final Map<String, String> errors;
   final ReceiptFormStatus status;
   final String? savedId;
   final String? submitError;
 
+  bool get isLoading => status == ReceiptFormStatus.loading;
   bool get isSubmitting => status == ReceiptFormStatus.submitting;
-  bool get isSuccess => status == ReceiptFormStatus.success;
   bool get hasErrors => errors.isNotEmpty;
 
   String? errorFor(String key) => errors[key];
@@ -30,6 +33,7 @@ class ReceiptFormState extends Equatable {
 
   ReceiptFormState copyWith({
     ReceiptFormData? data,
+    ReceiptFormOptions? options,
     Map<String, String>? errors,
     ReceiptFormStatus? status,
     String? savedId,
@@ -49,6 +53,7 @@ class ReceiptFormState extends Equatable {
 
     return ReceiptFormState(
       data: data ?? this.data,
+      options: options ?? this.options,
       errors: nextErrors,
       status: status ?? this.status,
       savedId: savedId ?? this.savedId,
@@ -57,5 +62,12 @@ class ReceiptFormState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [data, errors, status, savedId, submitError];
+  List<Object?> get props => [
+    data,
+    options,
+    errors,
+    status,
+    savedId,
+    submitError,
+  ];
 }

@@ -43,14 +43,19 @@ class _ReceiptDetailPageState extends State<ReceiptDetailPage> {
             children: [
               _kv('Số phiếu', r.receiptNumber),
               _kv('Ngày', df.format(r.receiptDate)),
-              if (r.unitName != null) _kv('Đơn vị', r.unitName!),
-              if (r.department != null) _kv('Bộ phận', r.department!),
+              _kv('Đơn vị', r.organizationName),
+              if (r.departmentName != null) _kv('Bộ phận', r.departmentName!),
               _kv('Người giao', r.delivererName),
               _kv('Nhập tại kho', r.warehouseName),
               if (r.warehouseLocation != null)
                 _kv('Địa điểm', r.warehouseLocation!),
               if (r.debitAccount != null) _kv('Nợ', r.debitAccount!),
               if (r.creditAccount != null) _kv('Có', r.creditAccount!),
+              if (r.preparerName != null)
+                _kv('Người lập phiếu', r.preparerName!),
+              if (r.storekeeperName != null) _kv('Thủ kho', r.storekeeperName!),
+              if (r.chiefAccountantName != null)
+                _kv('Kế toán trưởng', r.chiefAccountantName!),
               const Divider(height: 24),
               Text('Vật tư', style: context.texts.titleMedium),
               const SizedBox(height: 8),

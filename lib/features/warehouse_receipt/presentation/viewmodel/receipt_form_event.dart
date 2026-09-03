@@ -7,68 +7,96 @@ sealed class ReceiptFormEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Patch one or more header fields. Only non-null args are applied; pass
-/// [touchedKeys] so the matching validation errors clear as the user types.
+/// Load master data for the dropdowns.
+class ReceiptFormStarted extends ReceiptFormEvent {
+  const ReceiptFormStarted();
+}
+
+/// Patch one or more header fields. Id fields carry their resolved display name
+/// so the View doesn't have to round-trip through the bloc. Only non-null args
+/// apply; `touchedKeys` clears the matching validation errors as the user edits.
 class ReceiptHeaderChanged extends ReceiptFormEvent {
   const ReceiptHeaderChanged({
     this.receiptNumber,
     this.receiptDate,
-    this.unitName,
-    this.department,
+    this.organizationId,
+    this.organizationName,
+    this.departmentId,
+    this.departmentName,
     this.debitAccount,
     this.creditAccount,
+    this.delivererUserId,
     this.delivererName,
     this.referenceDocNumber,
     this.referenceDocDate,
     this.referenceDocIssuer,
+    this.warehouseId,
     this.warehouseName,
     this.warehouseLocation,
     this.attachedDocumentCount,
+    this.preparerUserId,
     this.preparerName,
+    this.storekeeperUserId,
     this.storekeeperName,
+    this.chiefAccountantUserId,
     this.chiefAccountantName,
   });
 
   final String? receiptNumber;
   final DateTime? receiptDate;
-  final String? unitName;
-  final String? department;
+  final String? organizationId;
+  final String? organizationName;
+  final String? departmentId;
+  final String? departmentName;
   final String? debitAccount;
   final String? creditAccount;
+  final String? delivererUserId;
   final String? delivererName;
   final String? referenceDocNumber;
   final DateTime? referenceDocDate;
   final String? referenceDocIssuer;
+  final String? warehouseId;
   final String? warehouseName;
   final String? warehouseLocation;
   final int? attachedDocumentCount;
+  final String? preparerUserId;
   final String? preparerName;
+  final String? storekeeperUserId;
   final String? storekeeperName;
+  final String? chiefAccountantUserId;
   final String? chiefAccountantName;
 
   List<String> get touchedKeys => [
     if (receiptNumber != null) 'receiptNumber',
-    if (delivererName != null) 'delivererName',
-    if (warehouseName != null) 'warehouseName',
+    if (delivererUserId != null) 'delivererUserId',
+    if (warehouseId != null) 'warehouseId',
+    if (organizationId != null) 'organizationId',
     if (attachedDocumentCount != null) 'attachedDocumentCount',
   ];
 
   ReceiptFormData apply(ReceiptFormData data) => data.copyWith(
     receiptNumber: receiptNumber,
     receiptDate: receiptDate,
-    unitName: unitName,
-    department: department,
+    organizationId: organizationId,
+    organizationName: organizationName,
+    departmentId: departmentId,
+    departmentName: departmentName,
     debitAccount: debitAccount,
     creditAccount: creditAccount,
+    delivererUserId: delivererUserId,
     delivererName: delivererName,
     referenceDocNumber: referenceDocNumber,
     referenceDocDate: referenceDocDate,
     referenceDocIssuer: referenceDocIssuer,
+    warehouseId: warehouseId,
     warehouseName: warehouseName,
     warehouseLocation: warehouseLocation,
     attachedDocumentCount: attachedDocumentCount,
+    preparerUserId: preparerUserId,
     preparerName: preparerName,
+    storekeeperUserId: storekeeperUserId,
     storekeeperName: storekeeperName,
+    chiefAccountantUserId: chiefAccountantUserId,
     chiefAccountantName: chiefAccountantName,
   );
 
@@ -76,20 +104,20 @@ class ReceiptHeaderChanged extends ReceiptFormEvent {
   List<Object?> get props => [
     receiptNumber,
     receiptDate,
-    unitName,
-    department,
+    organizationId,
+    departmentId,
     debitAccount,
     creditAccount,
-    delivererName,
+    delivererUserId,
     referenceDocNumber,
     referenceDocDate,
     referenceDocIssuer,
-    warehouseName,
+    warehouseId,
     warehouseLocation,
     attachedDocumentCount,
-    preparerName,
-    storekeeperName,
-    chiefAccountantName,
+    preparerUserId,
+    storekeeperUserId,
+    chiefAccountantUserId,
   ];
 }
 
@@ -106,14 +134,11 @@ class ReceiptItemRemoved extends ReceiptFormEvent {
   List<Object?> get props => [rowId];
 }
 
-/// The row widget owns its controllers and emits its whole current value on
-/// every edit, so this carries the full [ReceiptItemFormData].
+/// The row widget owns its inputs and emits its whole current value.
 class ReceiptItemChanged extends ReceiptFormEvent {
   const ReceiptItemChanged(this.row);
 
   final ReceiptItemFormData row;
-
-  String get rowId => row.rowId;
 
   @override
   List<Object?> get props => [row];

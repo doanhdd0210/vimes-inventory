@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/extensions.dart';
+import '../../../master_data/domain/entities/item.dart';
 import '../viewmodel/receipt_form_bloc.dart';
 import '../viewmodel/receipt_form_data.dart';
+import '../viewmodel/receipt_form_options.dart';
 import 'receipt_field.dart';
 
-/// The line-items block (columns A–D and 1–4) with add / remove.
+/// The line-items block (columns A–D and 1–4). Pick a vật tư → tên/mã/ĐVT/đơn
+/// giá tự điền.
 class ReceiptItemsSection extends StatelessWidget {
   const ReceiptItemsSection({super.key});
 
@@ -51,6 +54,7 @@ class ReceiptItemsSection extends StatelessWidget {
               child: _ReceiptItemCard(
                 index: i,
                 item: items[i],
+                options: state.options,
                 onChanged: (row) => bloc.add(ReceiptItemChanged(row)),
                 onRemove: () => bloc.add(ReceiptItemRemoved(items[i].rowId)),
                 errorFor: (col) => state.itemErrorFor(i, col),
@@ -65,6 +69,7 @@ class _ReceiptItemCard extends StatelessWidget {
   const _ReceiptItemCard({
     required this.index,
     required this.item,
+    required this.options,
     required this.onChanged,
     required this.onRemove,
     required this.errorFor,
@@ -72,12 +77,17 @@ class _ReceiptItemCard extends StatelessWidget {
 
   final int index;
   final ReceiptItemFormData item;
+  final ReceiptFormOptions options;
   final ValueChanged<ReceiptItemFormData> onChanged;
   final VoidCallback onRemove;
   final String? Function(String column) errorFor;
 
   @override
   Widget build(BuildContext context) {
+    final selectedItem = options.items.firstWhereOrNull(
+      (it) => it.id == item.itemId,
+    );
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -102,37 +112,29 @@ class _ReceiptItemCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            ReceiptField(
-              label: 'Tên, nhãn hiệu, quy cách (B) *',
-              value: item.name,
-              errorText: errorFor('name'),
-              maxLines: 2,
-              onChanged: (v) => onChanged(item.copyWith(name: v)),
+            ReceiptDropdown<Item>(
+              label: 'Vật tư (B/C) *',
+              value: selectedItem,
+              items: options.items,
+              labelOf: (it) => '${it.code} — ${it.name}',
+              errorText: errorFor('itemId'),
+              onChanged: (it) {
+                if (it == null) return;
+                onChanged(
+                  item.fromItem(it, unitName: options.uomName(it.uomId)),
+                );
+              },
             ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: ReceiptField(
-                    label: 'Mã số (C)',
-                    value: item.code,
-                    onChanged: (v) => onChanged(item.copyWith(code: v)),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(labelText: 'ĐVT (D)'),
+                    child: Text(item.unit.isEmpty ? '—' : item.unit),
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: ReceiptField(
-                    label: 'ĐVT (D) *',
-                    value: item.unit,
-                    errorText: errorFor('unit'),
-                    onChanged: (v) => onChanged(item.copyWith(unit: v)),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
                 Expanded(
                   child: ReceiptField(
                     label: 'SL chứng từ (1)',
@@ -145,7 +147,11 @@ class _ReceiptItemCard extends StatelessWidget {
                         onChanged(item.copyWith(quantityDoc: parseNum(v))),
                   ),
                 ),
-                const SizedBox(width: 12),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
                 Expanded(
                   child: ReceiptField(
                     label: 'SL thực nhập (2) *',
@@ -159,11 +165,7 @@ class _ReceiptItemCard extends StatelessWidget {
                         onChanged(item.copyWith(quantityActual: parseNum(v))),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
+                const SizedBox(width: 12),
                 Expanded(
                   child: ReceiptField(
                     label: 'Đơn giá (3)',
@@ -179,19 +181,15 @@ class _ReceiptItemCard extends StatelessWidget {
                         onChanged(item.copyWith(unitPrice: parseNum(v))),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Thành tiền (4)',
-                    ),
-                    child: Text(
-                      item.amount.asCurrencyVnd,
-                      style: context.texts.titleMedium,
-                    ),
-                  ),
-                ),
               ],
+            ),
+            const SizedBox(height: 12),
+            InputDecorator(
+              decoration: const InputDecoration(labelText: 'Thành tiền (4)'),
+              child: Text(
+                item.amount.asCurrencyVnd,
+                style: context.texts.titleMedium,
+              ),
             ),
           ],
         ),

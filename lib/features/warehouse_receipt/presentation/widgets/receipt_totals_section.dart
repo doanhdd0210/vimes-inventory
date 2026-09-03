@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/helpers/vnd_words.dart';
+import '../../../master_data/domain/entities/app_user.dart';
 import '../viewmodel/receipt_form_bloc.dart';
 import 'receipt_field.dart';
 
@@ -16,7 +17,10 @@ class ReceiptTotalsSection extends StatelessWidget {
     final bloc = context.read<ReceiptFormBloc>();
     final state = context.watch<ReceiptFormBloc>().state;
     final data = state.data;
+    final users = state.options.users;
     final total = data.totalAmount;
+
+    AppUser? byId(String? id) => users.firstWhereOrNull((u) => u.id == id);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -64,31 +68,48 @@ class ReceiptTotalsSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: ReceiptField(
+              child: ReceiptDropdown<AppUser>(
                 label: 'Người lập phiếu',
-                value: data.preparerName,
-                onChanged: (v) =>
-                    bloc.add(ReceiptHeaderChanged(preparerName: v)),
+                value: byId(data.preparerUserId),
+                items: users,
+                labelOf: (u) => u.fullName,
+                onChanged: (u) => bloc.add(
+                  ReceiptHeaderChanged(
+                    preparerUserId: u?.id ?? '',
+                    preparerName: u?.fullName ?? '',
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: ReceiptField(
+              child: ReceiptDropdown<AppUser>(
                 label: 'Thủ kho',
-                value: data.storekeeperName,
-                onChanged: (v) =>
-                    bloc.add(ReceiptHeaderChanged(storekeeperName: v)),
+                value: byId(data.storekeeperUserId),
+                items: users,
+                labelOf: (u) => u.fullName,
+                onChanged: (u) => bloc.add(
+                  ReceiptHeaderChanged(
+                    storekeeperUserId: u?.id ?? '',
+                    storekeeperName: u?.fullName ?? '',
+                  ),
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        ReceiptField(
+        ReceiptDropdown<AppUser>(
           label: 'Kế toán trưởng',
-          value: data.chiefAccountantName,
-          textInputAction: TextInputAction.done,
-          onChanged: (v) =>
-              bloc.add(ReceiptHeaderChanged(chiefAccountantName: v)),
+          value: byId(data.chiefAccountantUserId),
+          items: users,
+          labelOf: (u) => u.fullName,
+          onChanged: (u) => bloc.add(
+            ReceiptHeaderChanged(
+              chiefAccountantUserId: u?.id ?? '',
+              chiefAccountantName: u?.fullName ?? '',
+            ),
+          ),
         ),
       ],
     );

@@ -10,11 +10,21 @@ void main() {
 
   test('flags missing header fields', () {
     final errors = WarehouseReceiptRules.validate(
-      receiptFixture(receiptNumber: '  ', delivererName: '', warehouseName: ''),
+      receiptFixture(
+        receiptNumber: '  ',
+        organizationId: '',
+        delivererUserId: '',
+        warehouseId: '',
+      ),
     );
     expect(
       errors.keys,
-      containsAll(<String>['receiptNumber', 'delivererName', 'warehouseName']),
+      containsAll(<String>[
+        'receiptNumber',
+        'organizationId',
+        'delivererUserId',
+        'warehouseId',
+      ]),
     );
   });
 
@@ -29,12 +39,18 @@ void main() {
     final errors = WarehouseReceiptRules.validate(
       receiptFixture(
         items: [
-          itemFixture(lineNo: 1, name: '', unit: '', quantityActual: 0),
+          itemFixture(
+            lineNo: 1,
+            itemId: '',
+            name: '',
+            unit: '',
+            quantityActual: 0,
+          ),
           itemFixture(lineNo: 2, unitPrice: -5, quantityDoc: -1),
         ],
       ),
     );
-    expect(errors['items[0].name'], isNotNull);
+    expect(errors['items[0].itemId'], isNotNull);
     expect(errors['items[0].unit'], isNotNull);
     expect(errors['items[0].quantityActual'], isNotNull);
     expect(errors['items[1].unitPrice'], isNotNull);

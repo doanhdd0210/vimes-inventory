@@ -3,11 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/extensions/extensions.dart';
+import '../../../master_data/domain/entities/app_user.dart';
+import '../../../master_data/domain/entities/department.dart';
+import '../../../master_data/domain/entities/organization.dart';
+import '../../../master_data/domain/entities/warehouse.dart';
 import '../viewmodel/receipt_form_bloc.dart';
 import 'receipt_field.dart';
 
-/// The header block of Mẫu 01‑VT: đơn vị / bộ phận, số, ngày, Nợ/Có, người giao,
-/// chứng từ tham chiếu, kho nhập.
+/// Header block of Mẫu 01‑VT: đơn vị / bộ phận, số, ngày, Nợ/Có, người giao,
+/// chứng từ tham chiếu, kho nhập. Master fields are dropdowns.
 class ReceiptHeaderSection extends StatelessWidget {
   const ReceiptHeaderSection({super.key});
 
@@ -16,9 +21,23 @@ class ReceiptHeaderSection extends StatelessWidget {
     final bloc = context.read<ReceiptFormBloc>();
     final state = context.watch<ReceiptFormBloc>().state;
     final data = state.data;
+    final options = state.options;
     final df = DateFormat('dd/MM/yyyy');
 
-    void patch(ReceiptHeaderChanged event) => bloc.add(event);
+    void patch(ReceiptHeaderChanged e) => bloc.add(e);
+
+    final currentOrg = options.organizations.firstWhereOrNull(
+      (o) => o.id == data.organizationId,
+    );
+    final currentDept = options.departments.firstWhereOrNull(
+      (d) => d.id == data.departmentId,
+    );
+    final currentWh = options.warehouses.firstWhereOrNull(
+      (w) => w.id == data.warehouseId,
+    );
+    final deliverer = options.users.firstWhereOrNull(
+      (u) => u.id == data.delivererUserId,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -26,18 +45,37 @@ class ReceiptHeaderSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: ReceiptField(
-                label: 'Đơn vị',
-                value: data.unitName,
-                onChanged: (v) => patch(ReceiptHeaderChanged(unitName: v)),
+              child: ReceiptDropdown<Organization>(
+                label: 'Đơn vị *',
+                value: currentOrg,
+                items: options.organizations,
+                labelOf: (o) => o.name,
+                errorText: state.errorFor('organizationId'),
+                onChanged: (o) => patch(
+                  ReceiptHeaderChanged(
+                    organizationId: o?.id ?? '',
+                    organizationName: o?.name ?? '',
+                    departmentId: '',
+                    departmentName: '',
+                    warehouseId: '',
+                    warehouseName: '',
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: ReceiptField(
+              child: ReceiptDropdown<Department>(
                 label: 'Bộ phận',
-                value: data.department,
-                onChanged: (v) => patch(ReceiptHeaderChanged(department: v)),
+                value: currentDept,
+                items: options.departmentsOf(data.organizationId),
+                labelOf: (d) => d.name,
+                onChanged: (d) => patch(
+                  ReceiptHeaderChanged(
+                    departmentId: d?.id ?? '',
+                    departmentName: d?.name ?? '',
+                  ),
+                ),
               ),
             ),
           ],
@@ -85,11 +123,19 @@ class ReceiptHeaderSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ReceiptField(
+        ReceiptDropdown<AppUser>(
           label: 'Họ và tên người giao *',
-          value: data.delivererName,
-          errorText: state.errorFor('delivererName'),
-          onChanged: (v) => patch(ReceiptHeaderChanged(delivererName: v)),
+          value: deliverer,
+          items: options.users,
+          labelOf: (u) =>
+              '${u.fullName}${u.position == null ? '' : ' · ${u.position}'}',
+          errorText: state.errorFor('delivererUserId'),
+          onChanged: (u) => patch(
+            ReceiptHeaderChanged(
+              delivererUserId: u?.id ?? '',
+              delivererName: u?.fullName ?? '',
+            ),
+          ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -120,28 +166,20 @@ class ReceiptHeaderSection extends StatelessWidget {
           onChanged: (v) => patch(ReceiptHeaderChanged(referenceDocIssuer: v)),
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: ReceiptField(
-                label: 'Nhập tại kho *',
-                value: data.warehouseName,
-                errorText: state.errorFor('warehouseName'),
-                onChanged: (v) => patch(ReceiptHeaderChanged(warehouseName: v)),
-              ),
+        ReceiptDropdown<Warehouse>(
+          label: 'Nhập tại kho *',
+          value: currentWh,
+          items: options.warehousesOf(data.organizationId),
+          labelOf: (w) =>
+              '${w.name}${w.location == null ? '' : ' — ${w.location}'}',
+          errorText: state.errorFor('warehouseId'),
+          onChanged: (w) => patch(
+            ReceiptHeaderChanged(
+              warehouseId: w?.id ?? '',
+              warehouseName: w?.name ?? '',
+              warehouseLocation: w?.location ?? '',
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 2,
-              child: ReceiptField(
-                label: 'Địa điểm',
-                value: data.warehouseLocation,
-                onChanged: (v) =>
-                    patch(ReceiptHeaderChanged(warehouseLocation: v)),
-              ),
-            ),
-          ],
+          ),
         ),
       ],
     );
@@ -182,5 +220,5 @@ class _DateField extends StatelessWidget {
   }
 }
 
-/// Digits-only formatter for the "số chứng từ gốc kèm theo" field.
+/// Digits-only formatter re-exported for the totals section.
 final digitsOnly = FilteringTextInputFormatter.digitsOnly;

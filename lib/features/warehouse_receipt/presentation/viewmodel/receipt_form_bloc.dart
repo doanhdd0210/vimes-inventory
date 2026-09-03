@@ -1,21 +1,43 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/domain/crud_repository.dart';
 import '../../../../core/error/failures.dart';
+import '../../../master_data/domain/entities/app_user.dart';
+import '../../../master_data/domain/entities/department.dart';
+import '../../../master_data/domain/entities/item.dart';
+import '../../../master_data/domain/entities/organization.dart';
+import '../../../master_data/domain/entities/unit_of_measure.dart';
+import '../../../master_data/domain/entities/warehouse.dart';
 import '../../domain/usecases/create_warehouse_receipt.dart';
 import '../../domain/usecases/warehouse_receipt_rules.dart';
 import 'receipt_form_data.dart';
+import 'receipt_form_options.dart';
 
 part 'receipt_form_event.dart';
 part 'receipt_form_state.dart';
 
-/// ViewModel for the goods-receipt entry form. Holds the [ReceiptFormData]
-/// draft, exposes per-field [errors], and submits through
-/// [CreateWarehouseReceipt].
+/// ViewModel for the goods-receipt entry form. Loads master data for the
+/// dropdowns, holds the [ReceiptFormData] draft with per-field [errors], and
+/// submits through [CreateWarehouseReceipt].
 class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
-  ReceiptFormBloc({required CreateWarehouseReceipt createWarehouseReceipt})
-    : _createWarehouseReceipt = createWarehouseReceipt,
-      super(ReceiptFormState(data: _seed())) {
+  ReceiptFormBloc({
+    required CreateWarehouseReceipt createWarehouseReceipt,
+    required CrudRepository<Organization> organizations,
+    required CrudRepository<Department> departments,
+    required CrudRepository<Warehouse> warehouses,
+    required CrudRepository<AppUser> users,
+    required CrudRepository<Item> items,
+    required CrudRepository<UnitOfMeasure> uoms,
+  }) : _createWarehouseReceipt = createWarehouseReceipt,
+       _organizations = organizations,
+       _departments = departments,
+       _warehouses = warehouses,
+       _users = users,
+       _items = items,
+       _uoms = uoms,
+       super(const ReceiptFormState(data: ReceiptFormData())) {
+    on<ReceiptFormStarted>(_onStarted);
     on<ReceiptHeaderChanged>(_onHeaderChanged);
     on<ReceiptItemAdded>(_onItemAdded);
     on<ReceiptItemRemoved>(_onItemRemoved);
@@ -24,11 +46,67 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
   }
 
   final CreateWarehouseReceipt _createWarehouseReceipt;
+  final CrudRepository<Organization> _organizations;
+  final CrudRepository<Department> _departments;
+  final CrudRepository<Warehouse> _warehouses;
+  final CrudRepository<AppUser> _users;
+  final CrudRepository<Item> _items;
+  final CrudRepository<UnitOfMeasure> _uoms;
+
   var _rowSeq = 0;
-
-  static ReceiptFormData _seed() => const ReceiptFormData();
-
   String _nextRowId() => 'row-${++_rowSeq}';
+
+  Future<void> _onStarted(
+    ReceiptFormStarted event,
+    Emitter<ReceiptFormState> emit,
+  ) async {
+    emit(state.copyWith(status: ReceiptFormStatus.loading));
+
+    final orgs = await _organizations.getAll();
+    final depts = await _departments.getAll();
+    final whs = await _warehouses.getAll();
+    final users = await _users.getAll();
+    final items = await _items.getAll();
+    final uoms = await _uoms.getAll();
+
+    for (final r in [orgs, depts, whs, users, items, uoms]) {
+      final failure = r.fold<Failure?>((f) => f, (_) => null);
+      if (failure != null) {
+        emit(
+          state.copyWith(
+            status: ReceiptFormStatus.failure,
+            submitError: failure.message,
+          ),
+        );
+        return;
+      }
+    }
+
+    final options = ReceiptFormOptions(
+      organizations: orgs.getOrElse(() => const []),
+      departments: depts.getOrElse(() => const []),
+      warehouses: whs.getOrElse(() => const []),
+      users: users.getOrElse(() => const []),
+      items: items.getOrElse(() => const []),
+      uoms: uoms.getOrElse(() => const []),
+    );
+
+    final org = options.organizations.isNotEmpty
+        ? options.organizations.first
+        : null;
+
+    emit(
+      state.copyWith(
+        status: ReceiptFormStatus.editing,
+        options: options,
+        data: state.data.copyWith(
+          receiptDate: state.data.receiptDate ?? DateTime.now(),
+          organizationId: org?.id ?? '',
+          organizationName: org?.name ?? '',
+        ),
+      ),
+    );
+  }
 
   void _onHeaderChanged(
     ReceiptHeaderChanged event,
@@ -44,13 +122,14 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
   }
 
   void _onItemAdded(ReceiptItemAdded event, Emitter<ReceiptFormState> emit) {
-    final items = [
-      ...state.data.items,
-      ReceiptItemFormData(rowId: _nextRowId()),
-    ];
     emit(
       state.copyWith(
-        data: state.data.copyWith(items: items),
+        data: state.data.copyWith(
+          items: [
+            ...state.data.items,
+            ReceiptItemFormData(rowId: _nextRowId()),
+          ],
+        ),
         status: ReceiptFormStatus.editing,
         clearErrorsFor: const ['items'],
       ),
@@ -61,14 +140,14 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
     ReceiptItemRemoved event,
     Emitter<ReceiptFormState> emit,
   ) {
-    final items = state.data.items
-        .where((i) => i.rowId != event.rowId)
-        .toList(growable: false);
     emit(
       state.copyWith(
-        data: state.data.copyWith(items: items),
+        data: state.data.copyWith(
+          items: state.data.items
+              .where((i) => i.rowId != event.rowId)
+              .toList(growable: false),
+        ),
         status: ReceiptFormStatus.editing,
-        // row indexes shifted — drop every per-row error, they get recomputed.
         clearRowErrors: true,
       ),
     );
@@ -78,12 +157,13 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
     ReceiptItemChanged event,
     Emitter<ReceiptFormState> emit,
   ) {
-    final items = state.data.items
-        .map((i) => i.rowId == event.rowId ? event.row : i)
-        .toList(growable: false);
     emit(
       state.copyWith(
-        data: state.data.copyWith(items: items),
+        data: state.data.copyWith(
+          items: state.data.items
+              .map((i) => i.rowId == event.row.rowId ? event.row : i)
+              .toList(growable: false),
+        ),
         status: ReceiptFormStatus.editing,
         clearRowErrors: true,
       ),
@@ -96,7 +176,6 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
   ) async {
     final receipt = state.data.toEntity();
 
-    // Fast local check so the UI shows every error without a round-trip.
     final localErrors = WarehouseReceiptRules.validate(receipt);
     if (localErrors.isNotEmpty) {
       emit(

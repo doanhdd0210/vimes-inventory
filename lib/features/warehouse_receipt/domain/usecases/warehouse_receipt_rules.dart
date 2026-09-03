@@ -11,11 +11,14 @@ class WarehouseReceiptRules {
     if (receipt.receiptNumber.trim().isEmpty) {
       errors['receiptNumber'] = 'Bắt buộc nhập số phiếu';
     }
-    if (receipt.delivererName.trim().isEmpty) {
-      errors['delivererName'] = 'Bắt buộc nhập họ tên người giao';
+    if (receipt.organizationId.trim().isEmpty) {
+      errors['organizationId'] = 'Chọn đơn vị';
     }
-    if (receipt.warehouseName.trim().isEmpty) {
-      errors['warehouseName'] = 'Bắt buộc nhập kho nhập';
+    if (receipt.warehouseId.trim().isEmpty) {
+      errors['warehouseId'] = 'Chọn kho nhập';
+    }
+    if (receipt.delivererUserId.trim().isEmpty) {
+      errors['delivererUserId'] = 'Chọn người giao';
     }
     if (receipt.attachedDocumentCount < 0) {
       errors['attachedDocumentCount'] = 'Không được âm';
@@ -27,11 +30,11 @@ class WarehouseReceiptRules {
 
     for (var i = 0; i < receipt.items.length; i++) {
       final item = receipt.items[i];
-      if (item.name.trim().isEmpty) {
-        errors['items[$i].name'] = 'Bắt buộc nhập tên vật tư';
+      if (item.itemId.trim().isEmpty && item.name.trim().isEmpty) {
+        errors['items[$i].itemId'] = 'Chọn vật tư';
       }
       if (item.unit.trim().isEmpty) {
-        errors['items[$i].unit'] = 'Bắt buộc nhập đơn vị tính';
+        errors['items[$i].unit'] = 'Thiếu đơn vị tính';
       }
       if (item.quantityActual <= 0) {
         errors['items[$i].quantityActual'] =

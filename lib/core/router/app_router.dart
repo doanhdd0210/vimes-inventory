@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/master_data/presentation/master_data_hub_page.dart';
+import '../../features/stock/presentation/stock_list_page.dart';
 import '../../features/warehouse_receipt/presentation/view/receipt_detail_page.dart';
 import '../../features/warehouse_receipt/presentation/view/receipt_form_page.dart';
 import '../../features/warehouse_receipt/presentation/view/receipt_list_page.dart';
@@ -37,6 +38,11 @@ class AppRouter {
             name: AppRoute.masterData.name,
             path: AppRoute.masterData.path,
             builder: (context, state) => const MasterDataHubPage(),
+          ),
+          GoRoute(
+            name: AppRoute.stock.name,
+            path: AppRoute.stock.path,
+            builder: (context, state) => const StockListPage(),
           ),
         ],
       ),

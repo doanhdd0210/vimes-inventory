@@ -35,6 +35,11 @@ class _ReceiptListView extends StatelessWidget {
         title: const Text('Phiếu nhập kho'),
         actions: [
           IconButton(
+            tooltip: 'Tồn kho',
+            icon: const Icon(Icons.inventory_outlined),
+            onPressed: () => context.pushNamed(AppRoute.stock.name),
+          ),
+          IconButton(
             tooltip: 'Danh mục',
             icon: const Icon(Icons.folder_outlined),
             onPressed: () => context.pushNamed(AppRoute.masterData.name),

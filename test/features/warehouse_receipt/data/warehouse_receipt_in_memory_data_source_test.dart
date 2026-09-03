@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vimes_inventory/core/error/exceptions.dart';
+import 'package:vimes_inventory/features/stock/data/in_memory_stock_store.dart';
 import 'package:vimes_inventory/features/warehouse_receipt/data/datasources/warehouse_receipt_in_memory_data_source.dart';
 import 'package:vimes_inventory/features/warehouse_receipt/data/models/warehouse_receipt_model.dart';
 
@@ -10,8 +11,20 @@ WarehouseReceiptModel model({String number = 'PN-1'}) =>
 
 void main() {
   late WarehouseReceiptInMemoryDataSource ds;
+  late InMemoryStockStore stock;
 
-  setUp(() => ds = WarehouseReceiptInMemoryDataSource());
+  setUp(() {
+    stock = InMemoryStockStore();
+    ds = WarehouseReceiptInMemoryDataSource(stock);
+  });
+
+  test('posts stock into the shared store', () async {
+    await ds.createReceipt(model(number: 'PN-STOCK'));
+    final rows = stock.stockFor('org-1');
+    expect(rows, hasLength(1));
+    expect(rows.single.quantityOnHand, 10);
+    expect(rows.single.avgCost, 120000);
+  });
 
   test('createReceipt stores and returns a generated id', () async {
     final id = await ds.createReceipt(model());

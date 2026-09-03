@@ -30,21 +30,21 @@ class _ItemRepo extends Mock implements CrudRepository<Item> {}
 
 class _UomRepo extends Mock implements CrudRepository<UnitOfMeasure> {}
 
-final _org = const Organization(id: 'o1', code: 'VIMES', name: 'VIMES');
-final _wh = const Warehouse(
+const _org = Organization(id: 'o1', code: 'VIMES', name: 'VIMES');
+const _wh = Warehouse(
   id: 'w1',
   organizationId: 'o1',
   code: 'K1',
   name: 'Kho A',
 );
-final _user = const AppUser(
+const _user = AppUser(
   id: 'u1',
   organizationId: 'o1',
   username: 'a',
   fullName: 'Nguyễn Văn A',
 );
-final _uom = const UnitOfMeasure(id: 'm1', code: 'CAI', name: 'Cái');
-final _item = const Item(id: 'i1', code: 'VT001', name: 'Thép', uomId: 'm1');
+const _uom = UnitOfMeasure(id: 'm1', code: 'CAI', name: 'Cái');
+const _item = Item(id: 'i1', code: 'VT001', name: 'Thép', uomId: 'm1');
 
 void main() {
   late _MockCreate create;
@@ -65,12 +65,12 @@ void main() {
     users = _UserRepo();
     items = _ItemRepo();
     uoms = _UomRepo();
-    when(() => orgs.getAll()).thenAnswer((_) async => Right([_org]));
+    when(() => orgs.getAll()).thenAnswer((_) async => const Right([_org]));
     when(() => depts.getAll()).thenAnswer((_) async => const Right([]));
-    when(() => whs.getAll()).thenAnswer((_) async => Right([_wh]));
-    when(() => users.getAll()).thenAnswer((_) async => Right([_user]));
-    when(() => items.getAll()).thenAnswer((_) async => Right([_item]));
-    when(() => uoms.getAll()).thenAnswer((_) async => Right([_uom]));
+    when(() => whs.getAll()).thenAnswer((_) async => const Right([_wh]));
+    when(() => users.getAll()).thenAnswer((_) async => const Right([_user]));
+    when(() => items.getAll()).thenAnswer((_) async => const Right([_item]));
+    when(() => uoms.getAll()).thenAnswer((_) async => const Right([_uom]));
   });
 
   ReceiptFormBloc build() => ReceiptFormBloc(

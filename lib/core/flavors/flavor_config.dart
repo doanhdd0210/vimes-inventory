@@ -4,11 +4,10 @@ import 'flavor.dart';
 /// [FlavorConfig.instance]. Set it up from a flavor entry point
 /// (`main_dev.dart`, `main_staging.dart`, `main_prod.dart`) before `runApp`.
 class FlavorConfig {
-  /// TEMPORARY: Firebase is not configured yet (`flutterfire configure` still
-  /// pending). While this is `true` every flavor runs on the in-memory
-  /// datasources regardless of the per-flavor setting. Flip to `false` once
-  /// `lib/firebase_options.dart` is generated.
-  static const bool firebaseTemporarilyDisabled = true;
+  /// Kill-switch: when `true` every flavor runs on the in-memory datasources
+  /// regardless of the per-flavor setting. Set back to `true` to demo offline.
+  /// Firebase project: vimes-inventory-doanhdd.
+  static const bool firebaseTemporarilyDisabled = false;
 
   FlavorConfig._({
     required this.flavor,

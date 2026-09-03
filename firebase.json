@@ -1,0 +1,34 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "vimes-inventory-doanhdd",
+          "appId": "1:649130530869:android:ae1bf84ca9460340fbb97c",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "vimes-inventory-doanhdd",
+          "appId": "1:649130530869:ios:6abde5b54e001f49fbb97c",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "vimes-inventory-doanhdd",
+          "configurations": {
+            "android": "1:649130530869:android:ae1bf84ca9460340fbb97c",
+            "ios": "1:649130530869:ios:6abde5b54e001f49fbb97c"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

@@ -11,6 +11,8 @@ analyzer:
     strict-raw-types: true
   errors:
     invalid_annotation_target: ignore
+    # Style nag that misfires on `if (x != null) Widget(x)` in child lists.
+    use_null_aware_elements: ignore
 
 linter:
   rules:

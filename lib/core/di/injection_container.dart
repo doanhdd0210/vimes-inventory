@@ -212,6 +212,7 @@ void _initWarehouseReceipt({required bool firebaseEnabled}) {
   sl.registerFactory(
     () => ReceiptFormBloc(
       createWarehouseReceipt: sl(),
+      auth: sl<AuthRepository>(),
       organizations: sl<CrudRepository<Organization>>(),
       departments: sl<CrudRepository<Department>>(),
       warehouses: sl<CrudRepository<Warehouse>>(),

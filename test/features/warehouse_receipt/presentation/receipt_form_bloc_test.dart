@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vimes_inventory/core/domain/crud_repository.dart';
 import 'package:vimes_inventory/core/error/failures.dart';
+import 'package:vimes_inventory/features/auth/data/auth_data_source.dart';
+import 'package:vimes_inventory/features/auth/data/auth_repository_impl.dart';
 import 'package:vimes_inventory/features/master_data/domain/entities/app_user.dart';
 import 'package:vimes_inventory/features/master_data/domain/entities/department.dart';
 import 'package:vimes_inventory/features/master_data/domain/entities/item.dart';
@@ -75,6 +77,7 @@ void main() {
 
   ReceiptFormBloc build() => ReceiptFormBloc(
     createWarehouseReceipt: create,
+    auth: AuthRepositoryImpl(FakeAuthDataSource()),
     organizations: orgs,
     departments: depts,
     warehouses: whs,
@@ -84,8 +87,9 @@ void main() {
   );
 
   Future<void> fillValid(ReceiptFormBloc bloc) async {
+    bloc.add(const ReceiptFormStarted());
+    await Future<void>.delayed(Duration.zero);
     bloc
-      ..add(const ReceiptFormStarted())
       ..add(
         const ReceiptHeaderChanged(
           receiptNumber: 'PN-001',

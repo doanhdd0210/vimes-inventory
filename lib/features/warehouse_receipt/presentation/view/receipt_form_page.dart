@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/extensions/extensions.dart';
 import '../viewmodel/receipt_form_bloc.dart';
 import '../widgets/receipt_header_section.dart';
 import '../widgets/receipt_items_section.dart';
@@ -31,67 +32,116 @@ class _ReceiptFormView extends StatelessWidget {
           (curr.status == ReceiptFormStatus.success ||
               curr.submitError != null),
       listener: (context, state) {
+        final messenger = ScaffoldMessenger.of(context);
         if (state.status == ReceiptFormStatus.success) {
-          ScaffoldMessenger.of(context)
+          messenger
             ..hideCurrentSnackBar()
             ..showSnackBar(
               const SnackBar(content: Text('Đã lưu phiếu nhập kho')),
             );
           Navigator.of(context).pop(state.savedId);
         } else if (state.submitError != null) {
-          ScaffoldMessenger.of(context)
+          messenger
             ..hideCurrentSnackBar()
             ..showSnackBar(SnackBar(content: Text(state.submitError!)));
         }
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Phiếu nhập kho')),
+          backgroundColor: context.colors.surfaceContainerLowest,
+          appBar: AppBar(title: const Text('Lập phiếu nhập kho')),
           body: state.isLoading
               ? const Center(child: CircularProgressIndicator())
               : AbsorbPointer(
                   absorbing: state.isSubmitting,
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
                     children: const [
-                      ReceiptHeaderSection(),
-                      SizedBox(height: 20),
-                      Divider(),
-                      SizedBox(height: 8),
+                      ReceiptInfoSection(),
+                      SizedBox(height: 12),
                       ReceiptItemsSection(),
-                      SizedBox(height: 20),
-                      Divider(),
-                      SizedBox(height: 8),
+                      SizedBox(height: 12),
                       ReceiptTotalsSection(),
                     ],
                   ),
                 ),
           bottomNavigationBar: state.isLoading
               ? null
-              : Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    8,
-                    16,
-                    8 + MediaQuery.viewPaddingOf(context).bottom,
-                  ),
-                  child: FilledButton.icon(
-                    onPressed: state.isSubmitting
-                        ? null
-                        : () => context.read<ReceiptFormBloc>().add(
-                            const ReceiptSubmitted(),
-                          ),
-                    icon: state.isSubmitting
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.save),
-                    label: Text(state.isSubmitting ? 'Đang lưu…' : 'Lưu phiếu'),
+              : _SaveBar(
+                  total: state.data.totalAmount,
+                  lineCount: state.data.items.length,
+                  submitting: state.isSubmitting,
+                  onSave: () => context.read<ReceiptFormBloc>().add(
+                    const ReceiptSubmitted(),
                   ),
                 ),
         );
       },
+    );
+  }
+}
+
+class _SaveBar extends StatelessWidget {
+  const _SaveBar({
+    required this.total,
+    required this.lineCount,
+    required this.submitting,
+    required this.onSave,
+  });
+
+  final num total;
+  final int lineCount;
+  final bool submitting;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 8,
+      color: context.colors.surface,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          10,
+          16,
+          10 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$lineCount dòng · Cộng',
+                    style: context.texts.labelSmall?.copyWith(
+                      color: context.colors.outline,
+                    ),
+                  ),
+                  Text(
+                    total.asCurrencyVnd,
+                    style: context.texts.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            FilledButton.icon(
+              onPressed: submitting ? null : onSave,
+              icon: submitting
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save),
+              label: Text(submitting ? 'Đang lưu…' : 'Lưu phiếu'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

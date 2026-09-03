@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../core/domain/crud_repository.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/extensions/iterable_extensions.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../master_data/domain/entities/app_user.dart';
 import '../../../master_data/domain/entities/department.dart';
 import '../../../master_data/domain/entities/item.dart';
@@ -23,6 +25,7 @@ part 'receipt_form_state.dart';
 class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
   ReceiptFormBloc({
     required CreateWarehouseReceipt createWarehouseReceipt,
+    required AuthRepository auth,
     required CrudRepository<Organization> organizations,
     required CrudRepository<Department> departments,
     required CrudRepository<Warehouse> warehouses,
@@ -30,6 +33,7 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
     required CrudRepository<Item> items,
     required CrudRepository<UnitOfMeasure> uoms,
   }) : _createWarehouseReceipt = createWarehouseReceipt,
+       _auth = auth,
        _organizations = organizations,
        _departments = departments,
        _warehouses = warehouses,
@@ -46,6 +50,7 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
   }
 
   final CreateWarehouseReceipt _createWarehouseReceipt;
+  final AuthRepository _auth;
   final CrudRepository<Organization> _organizations;
   final CrudRepository<Department> _departments;
   final CrudRepository<Warehouse> _warehouses;
@@ -91,19 +96,50 @@ class ReceiptFormBloc extends Bloc<ReceiptFormEvent, ReceiptFormState> {
       uoms: uoms.getOrElse(() => const []),
     );
 
-    final org = options.organizations.isNotEmpty
-        ? options.organizations.first
-        : null;
+    // Đơn vị / bộ phận lấy từ user đăng nhập; nếu không tìm thấy thì fallback
+    // về đơn vị đầu tiên.
+    final uid = _auth.currentAccount?.uid;
+    final me = options.users
+        .where((u) => u.id == uid)
+        .cast<AppUser?>()
+        .firstOrNull;
+    final org = me == null
+        ? (options.organizations.isNotEmpty
+              ? options.organizations.first
+              : null)
+        : options.organizations
+              .where((o) => o.id == me.organizationId)
+              .cast<Organization?>()
+              .firstOrNull;
+    final dept = me?.departmentId == null
+        ? null
+        : options.departments
+              .where((d) => d.id == me!.departmentId)
+              .cast<Department?>()
+              .firstOrNull;
+
+    var data = state.data.copyWith(
+      receiptDate: state.data.receiptDate ?? DateTime.now(),
+      organizationId: org?.id ?? '',
+      organizationName: org?.name ?? '',
+      departmentId: dept?.id,
+      departmentName: dept?.name,
+    );
+    if (me != null) {
+      // gợi ý mặc định: người giao & người lập phiếu = người đăng nhập
+      data = data.copyWith(
+        delivererUserId: me.id,
+        delivererName: me.fullName,
+        preparerUserId: me.id,
+        preparerName: me.fullName,
+      );
+    }
 
     emit(
       state.copyWith(
         status: ReceiptFormStatus.editing,
         options: options,
-        data: state.data.copyWith(
-          receiptDate: state.data.receiptDate ?? DateTime.now(),
-          organizationId: org?.id ?? '',
-          organizationName: org?.name ?? '',
-        ),
+        data: data,
       ),
     );
   }

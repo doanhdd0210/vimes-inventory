@@ -4,28 +4,29 @@ import '../../../core/constants/firestore_collections.dart';
 import '../../../core/helpers/app_logger.dart';
 import 'master_seed.dart';
 
-/// One-time Firestore seed of the demo master data. Runs at bootstrap when
-/// Firebase is on and the `organizations` collection is still empty. Uses fixed
-/// document ids (`MasterSeed.*`) so the same records aren't duplicated on a
-/// re-run and cross-references stay valid.
+/// Keeps the Firestore master data in sync with [MasterSeed] on every sign-in.
+///
+/// Writes are an idempotent upsert (`set` + `merge` on fixed `MasterSeed.*`
+/// ids), so running it repeatedly never duplicates a record and picks up new
+/// seed entries added later (e.g. extra đơn vị). It is a demo convenience —
+/// editing a seeded record through the app will be reset on the next launch;
+/// records added by the user keep their own ids and are untouched.
 class MasterDataSeeder {
   const MasterDataSeeder(this._firestore);
 
   final FirebaseFirestore _firestore;
 
-  Future<void> seedIfEmpty() async {
+  Future<void> sync() async {
     try {
-      final orgs = await _firestore
-          .collection(FirestoreCollections.organizations)
-          .limit(1)
-          .get();
-      if (orgs.docs.isNotEmpty) return;
-
-      AppLogger.instance.i('Seeding Firestore master data…');
+      AppLogger.instance.i('Syncing Firestore master data…');
       final batch = _firestore.batch();
 
       void put(String collection, String id, Map<String, dynamic> data) {
-        batch.set(_firestore.collection(collection).doc(id), data);
+        batch.set(
+          _firestore.collection(collection).doc(id),
+          data,
+          SetOptions(merge: true),
+        );
       }
 
       for (final o in MasterSeed.organizations) {
@@ -51,9 +52,9 @@ class MasterDataSeeder {
       }
 
       await batch.commit();
-      AppLogger.instance.i('Firestore master data seeded.');
+      AppLogger.instance.i('Firestore master data synced.');
     } on FirebaseException catch (e) {
-      AppLogger.instance.w('Seed skipped: ${e.message ?? e.code}');
+      AppLogger.instance.w('Master data sync skipped: ${e.message ?? e.code}');
     }
   }
 }

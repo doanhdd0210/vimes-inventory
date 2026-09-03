@@ -74,7 +74,7 @@ void _initAuth({required bool firebaseEnabled}) {
       // master data first, then a couple of sample phiếu on top of it.
       onAuthenticated: firebaseEnabled
           ? () async {
-              await sl<MasterDataSeeder>().seedIfEmpty();
+              await sl<MasterDataSeeder>().sync();
               await sl<SampleReceiptSeeder>().seedIfEmpty();
             }
           : null,

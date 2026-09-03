@@ -2,11 +2,22 @@ import 'package:flutter/material.dart';
 
 /// Raw brand palette. UI code should prefer `Theme.of(context).colorScheme`;
 /// these are for seeding the scheme and for the few brand-fixed accents.
+///
+/// Colours follow the VIMES identity (vimes.com.vn): a cyan→teal gradient mark
+/// on deep-navy ink.
 class AppColors {
   const AppColors._();
 
-  static const Color primary = Color(0xFF00695C);
-  static const Color primaryDark = Color(0xFF003D33);
+  /// VIMES teal — primary brand colour.
+  static const Color primary = Color(0xFF0F97AE);
+  static const Color primaryDark = Color(0xFF0B6E80);
+
+  /// Lighter aqua — top of the logo gradient.
+  static const Color brandTealLight = Color(0xFF19C3D6);
+
+  /// Deep navy ink — wordmark / dark CTAs.
+  static const Color brandNavy = Color(0xFF0B2536);
+
   static const Color secondary = Color(0xFFFFB300);
 
   static const Color success = Color(0xFF2E7D32);

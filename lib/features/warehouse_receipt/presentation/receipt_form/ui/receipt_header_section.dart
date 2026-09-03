@@ -38,49 +38,34 @@ class ReceiptInfoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: ReadonlyField(
-                  label: 'Đơn vị',
-                  value: data.organizationName,
-                  icon: Icons.business,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ReadonlyField(
-                  label: 'Bộ phận',
-                  value: data.departmentName ?? '',
-                  icon: Icons.account_tree_outlined,
-                ),
-              ),
-            ],
+          // Đơn vị & bộ phận lấy từ user đăng nhập — mỗi cái một dòng riêng để
+          // tên dài không bị co / cắt chữ.
+          ReadonlyField(
+            label: 'Đơn vị',
+            value: data.organizationName,
+            icon: Icons.business,
+          ),
+          const SizedBox(height: 10),
+          ReadonlyField(
+            label: 'Bộ phận',
+            value: data.departmentName ?? '',
+            icon: Icons.account_tree_outlined,
           ),
           const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ReceiptField(
-                  label: 'Số phiếu *',
-                  value: data.receiptNumber,
-                  hintText: 'VD: PN-2026-001',
-                  errorText: state.errorFor('receiptNumber'),
-                  onChanged: (v) =>
-                      patch(ReceiptHeaderChanged(receiptNumber: v)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _DateField(
-                  label: 'Ngày lập phiếu',
-                  value: data.receiptDate,
-                  format: df,
-                  onPick: (d) => patch(ReceiptHeaderChanged(receiptDate: d)),
-                ),
-              ),
-            ],
+          ResponsiveFieldPair(
+            first: ReceiptField(
+              label: 'Số phiếu *',
+              value: data.receiptNumber,
+              hintText: 'VD: PN-2026-001',
+              errorText: state.errorFor('receiptNumber'),
+              onChanged: (v) => patch(ReceiptHeaderChanged(receiptNumber: v)),
+            ),
+            second: _DateField(
+              label: 'Ngày lập phiếu',
+              value: data.receiptDate,
+              format: df,
+              onPick: (d) => patch(ReceiptHeaderChanged(receiptDate: d)),
+            ),
           ),
           const SizedBox(height: 12),
           ReceiptDropdown<Warehouse>(
@@ -133,51 +118,37 @@ class ReceiptInfoSection extends StatelessWidget {
                 style: context.texts.bodyMedium,
               ),
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: ReceiptField(
-                        label: 'Nợ (TK)',
-                        value: data.debitAccount,
-                        hintText: '152',
-                        onChanged: (v) =>
-                            patch(ReceiptHeaderChanged(debitAccount: v)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ReceiptField(
-                        label: 'Có (TK)',
-                        value: data.creditAccount,
-                        hintText: '331',
-                        onChanged: (v) =>
-                            patch(ReceiptHeaderChanged(creditAccount: v)),
-                      ),
-                    ),
-                  ],
+                ResponsiveFieldPair(
+                  first: ReceiptField(
+                    label: 'Nợ (TK)',
+                    value: data.debitAccount,
+                    hintText: '152',
+                    onChanged: (v) =>
+                        patch(ReceiptHeaderChanged(debitAccount: v)),
+                  ),
+                  second: ReceiptField(
+                    label: 'Có (TK)',
+                    value: data.creditAccount,
+                    hintText: '331',
+                    onChanged: (v) =>
+                        patch(ReceiptHeaderChanged(creditAccount: v)),
+                  ),
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ReceiptField(
-                        label: 'Theo chứng từ số',
-                        value: data.referenceDocNumber,
-                        onChanged: (v) =>
-                            patch(ReceiptHeaderChanged(referenceDocNumber: v)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _DateField(
-                        label: 'Ngày chứng từ',
-                        value: data.referenceDocDate,
-                        format: df,
-                        onPick: (d) =>
-                            patch(ReceiptHeaderChanged(referenceDocDate: d)),
-                      ),
-                    ),
-                  ],
+                ResponsiveFieldPair(
+                  first: ReceiptField(
+                    label: 'Theo chứng từ số',
+                    value: data.referenceDocNumber,
+                    onChanged: (v) =>
+                        patch(ReceiptHeaderChanged(referenceDocNumber: v)),
+                  ),
+                  second: _DateField(
+                    label: 'Ngày chứng từ',
+                    value: data.referenceDocDate,
+                    format: df,
+                    onPick: (d) =>
+                        patch(ReceiptHeaderChanged(referenceDocDate: d)),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 ReceiptField(

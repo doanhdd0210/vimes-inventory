@@ -7,6 +7,8 @@ class MasterSeed {
   const MasterSeed._();
 
   static const orgId = 'org-vimes';
+  static const orgIdHn = 'org-vimes-hn';
+  static const orgIdSg = 'org-vimes-sg';
   static const dptWarehouse = 'dept-kho';
   static const dptAccounting = 'dept-ketoan';
 
@@ -34,7 +36,24 @@ class MasterSeed {
       code: 'VIMES',
       name: 'Công ty CP VIMES',
       taxCode: '0101234567',
-      address: 'Hà Nội',
+      address: 'Tầng 8, toà nhà License, Cầu Giấy, Hà Nội',
+      phone: '024 3200 1234',
+    ),
+    const OrganizationModel(
+      id: orgIdHn,
+      code: 'VIMES-HN',
+      name: 'Chi nhánh VIMES Hà Nội',
+      taxCode: '0101234567-001',
+      address: 'KCN Quang Minh, Mê Linh, Hà Nội',
+      phone: '024 3765 8899',
+    ),
+    const OrganizationModel(
+      id: orgIdSg,
+      code: 'VIMES-SG',
+      name: 'Chi nhánh VIMES TP. Hồ Chí Minh',
+      taxCode: '0101234567-002',
+      address: '12 Nguyễn Văn Bảo, Gò Vấp, TP. HCM',
+      phone: '028 3894 5566',
     ),
   ];
 

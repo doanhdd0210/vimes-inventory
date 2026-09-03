@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../../core/flavors/flavor_config.dart';
+import '../../../../../core/widgets/vimes_logo.dart';
 import '../bloc/auth_cubit.dart';
 
 bool get _firebaseOn =>
@@ -55,16 +56,21 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.warehouse_rounded,
-                    size: 64,
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(height: 12),
+                  const Center(child: VimesLogo(size: 64)),
+                  const SizedBox(height: 16),
                   Text(
                     'VIMES Inventory',
                     textAlign: TextAlign.center,
-                    style: context.texts.headlineSmall,
+                    style: context.texts.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    'Quản lý nhập kho',
+                    textAlign: TextAlign.center,
+                    style: context.texts.bodyMedium?.copyWith(
+                      color: context.colors.outline,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   TextField(

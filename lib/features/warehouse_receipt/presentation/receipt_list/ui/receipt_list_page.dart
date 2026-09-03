@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../../core/di/injection_container.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../../core/router/app_route.dart';
+import '../../../../../core/widgets/vimes_logo.dart';
 import '../../../../auth/presentation/login/bloc/auth_cubit.dart';
 import '../../../domain/usecases/get_warehouse_receipts.dart';
 import '../bloc/receipt_list_bloc.dart';
@@ -33,7 +34,14 @@ class _ReceiptListView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Phiếu nhập kho'),
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            const VimesLogo(size: 26),
+            const SizedBox(width: 10),
+            Text('Phiếu nhập kho', style: context.texts.titleLarge),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: 'Tồn kho',

@@ -1,12 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../core/domain/crud_repository.dart';
-import '../../master_data/domain/entities/item.dart';
-import '../../master_data/domain/entities/organization.dart';
-import '../../master_data/domain/entities/warehouse.dart';
-import '../domain/entities/inventory_stock.dart';
-import '../domain/repositories/stock_repository.dart';
+import '../../../../core/domain/crud_repository.dart';
+import '../../../master_data/domain/entities/item.dart';
+import '../../../master_data/domain/entities/organization.dart';
+import '../../../master_data/domain/entities/warehouse.dart';
+import '../../domain/entities/inventory_stock.dart';
+import '../../domain/repositories/stock_repository.dart';
 
 enum StockListStatus { loading, success, failure }
 

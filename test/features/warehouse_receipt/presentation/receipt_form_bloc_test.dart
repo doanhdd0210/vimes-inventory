@@ -13,8 +13,8 @@ import 'package:vimes_inventory/features/master_data/domain/entities/organizatio
 import 'package:vimes_inventory/features/master_data/domain/entities/unit_of_measure.dart';
 import 'package:vimes_inventory/features/master_data/domain/entities/warehouse.dart';
 import 'package:vimes_inventory/features/warehouse_receipt/domain/usecases/create_warehouse_receipt.dart';
-import 'package:vimes_inventory/features/warehouse_receipt/presentation/viewmodel/receipt_form_bloc.dart';
-import 'package:vimes_inventory/features/warehouse_receipt/presentation/viewmodel/receipt_form_data.dart';
+import 'package:vimes_inventory/features/warehouse_receipt/presentation/bloc/receipt_form_bloc.dart';
+import 'package:vimes_inventory/features/warehouse_receipt/presentation/bloc/receipt_form_data.dart';
 
 class _MockCreate extends Mock implements CreateWarehouseReceipt {}
 

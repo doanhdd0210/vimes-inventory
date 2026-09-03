@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/di/injection_container.dart';
-import '../../../core/domain/crud_repository.dart';
-import '../../../core/domain/entity.dart';
-import '../../../core/extensions/extensions.dart';
-import 'master_list_cubit.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/domain/crud_repository.dart';
+import '../../../../core/domain/entity.dart';
+import '../../../../core/extensions/extensions.dart';
+import '../bloc/master_list_cubit.dart';
 
 /// Generic read-only catalog list. `titleOf` / `subtitleOf` render one row.
 class MasterListPage<E extends Entity> extends StatelessWidget {

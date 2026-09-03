@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../core/domain/crud_repository.dart';
-import '../../../core/domain/entity.dart';
+import '../../../../core/domain/crud_repository.dart';
+import '../../../../core/domain/entity.dart';
 
 enum MasterListStatus { loading, success, failure }
 

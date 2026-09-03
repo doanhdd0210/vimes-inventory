@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../viewmodel/receipt_form_bloc.dart';
-import '../widgets/receipt_header_section.dart';
-import '../widgets/receipt_items_section.dart';
-import '../widgets/receipt_totals_section.dart';
+import '../bloc/receipt_form_bloc.dart';
+import 'receipt_header_section.dart';
+import 'receipt_items_section.dart';
+import 'receipt_totals_section.dart';
 
 /// Data-entry screen for a Phiếu nhập kho. Pops the saved id on success.
 class ReceiptFormPage extends StatelessWidget {

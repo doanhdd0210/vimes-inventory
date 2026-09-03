@@ -6,9 +6,9 @@ import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/router/app_route.dart';
-import '../../../auth/presentation/auth_cubit.dart';
+import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../domain/usecases/get_warehouse_receipts.dart';
-import '../viewmodel/receipt_list_bloc.dart';
+import '../bloc/receipt_list_bloc.dart';
 
 class ReceiptListPage extends StatelessWidget {
   const ReceiptListPage({super.key});

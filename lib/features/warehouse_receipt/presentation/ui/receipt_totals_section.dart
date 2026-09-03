@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/helpers/vnd_words.dart';
 import '../../../master_data/domain/entities/app_user.dart';
-import '../viewmodel/receipt_form_bloc.dart';
+import '../bloc/receipt_form_bloc.dart';
 import 'form_section.dart';
 import 'receipt_field.dart';
 

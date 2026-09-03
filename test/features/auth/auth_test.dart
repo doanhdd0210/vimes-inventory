@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vimes_inventory/features/auth/data/auth_data_source.dart';
 import 'package:vimes_inventory/features/auth/data/auth_repository_impl.dart';
-import 'package:vimes_inventory/features/auth/presentation/auth_cubit.dart';
+import 'package:vimes_inventory/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:vimes_inventory/features/master_data/data/master_seed.dart';
 
 void main() {

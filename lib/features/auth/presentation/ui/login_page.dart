@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/extensions/extensions.dart';
-import '../../../core/flavors/flavor_config.dart';
-import 'auth_cubit.dart';
+import '../../../../core/extensions/extensions.dart';
+import '../../../../core/flavors/flavor_config.dart';
+import '../bloc/auth_cubit.dart';
 
 bool get _firebaseOn =>
     FlavorConfig.isInitialized && FlavorConfig.instance.useFirebase;

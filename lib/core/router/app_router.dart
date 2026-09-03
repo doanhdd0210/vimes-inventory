@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/presentation/auth_cubit.dart';
-import '../../features/auth/presentation/login_page.dart';
-import '../../features/master_data/presentation/master_data_hub_page.dart';
-import '../../features/stock/presentation/stock_list_page.dart';
-import '../../features/warehouse_receipt/presentation/view/receipt_detail_page.dart';
-import '../../features/warehouse_receipt/presentation/view/receipt_form_page.dart';
-import '../../features/warehouse_receipt/presentation/view/receipt_list_page.dart';
+import '../../features/auth/presentation/bloc/auth_cubit.dart';
+import '../../features/auth/presentation/ui/login_page.dart';
+import '../../features/master_data/presentation/ui/master_data_hub_page.dart';
+import '../../features/stock/presentation/ui/stock_list_page.dart';
+import '../../features/warehouse_receipt/presentation/ui/receipt_detail_page.dart';
+import '../../features/warehouse_receipt/presentation/ui/receipt_form_page.dart';
+import '../../features/warehouse_receipt/presentation/ui/receipt_list_page.dart';
 import '../di/injection_container.dart';
 import 'app_route.dart';
 import 'go_router_refresh_stream.dart';

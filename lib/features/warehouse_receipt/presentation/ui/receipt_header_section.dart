@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../master_data/domain/entities/app_user.dart';
 import '../../../master_data/domain/entities/warehouse.dart';
-import '../viewmodel/receipt_form_bloc.dart';
+import '../bloc/receipt_form_bloc.dart';
 import 'form_section.dart';
 import 'receipt_field.dart';
 

@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../domain/entities/auth_account.dart';
-import '../domain/repositories/auth_repository.dart';
+import '../../domain/entities/auth_account.dart';
+import '../../domain/repositories/auth_repository.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 

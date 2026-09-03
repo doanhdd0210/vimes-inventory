@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../domain/entities/app_user.dart';
-import '../domain/entities/department.dart';
-import '../domain/entities/item.dart';
-import '../domain/entities/item_category.dart';
-import '../domain/entities/organization.dart';
-import '../domain/entities/unit_of_measure.dart';
-import '../domain/entities/warehouse.dart';
+import '../../domain/entities/app_user.dart';
+import '../../domain/entities/department.dart';
+import '../../domain/entities/item.dart';
+import '../../domain/entities/item_category.dart';
+import '../../domain/entities/organization.dart';
+import '../../domain/entities/unit_of_measure.dart';
+import '../../domain/entities/warehouse.dart';
 import 'master_list_page.dart';
 
 /// "Danh mục" hub — one tile per master catalog.

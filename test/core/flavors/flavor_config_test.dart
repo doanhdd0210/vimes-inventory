@@ -28,17 +28,13 @@ void main() {
     expect(config.enableLogging, isFalse);
   });
 
-  test('firebaseTemporarilyDisabled forces useFirebase off', () {
+  test('useFirebase follows the kill-switch, then the per-call flag', () {
     final config = FlavorConfig.initialize(
       flavor: Flavor.prod,
       useFirebase: true,
     );
-    expect(
-      config.useFirebase,
-      isFalse,
-      reason: 'temporary kill-switch must win over the per-call flag',
-    );
-    expect(FlavorConfig.firebaseTemporarilyDisabled, isTrue);
+    // With the kill-switch off (current state) the explicit flag wins.
+    expect(config.useFirebase, !FlavorConfig.firebaseTemporarilyDisabled);
   });
 
   test('reset clears the singleton', () {

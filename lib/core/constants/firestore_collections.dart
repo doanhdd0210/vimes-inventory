@@ -3,5 +3,9 @@
 class FirestoreCollections {
   const FirestoreCollections._();
 
-  static const String sampleItems = 'sample_items';
+  static const String warehouseReceipts = 'warehouse_receipts';
+
+  /// Mirror collection: doc id == receiptNumber, used to enforce uniqueness in
+  /// a transaction.
+  static const String receiptNumbers = 'receipt_numbers';
 }

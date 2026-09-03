@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "warehouse_receipts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "warehouseName", "order": "ASCENDING" },
+        { "fieldPath": "receiptDate", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

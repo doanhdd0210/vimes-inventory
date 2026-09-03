@@ -2,7 +2,8 @@
 /// `path` for the underlying [GoRoute].
 enum AppRoute {
   home(name: 'home', path: '/'),
-  sampleDetail(name: 'sampleDetail', path: 'detail/:id');
+  receiptForm(name: 'receiptForm', path: 'new'),
+  receiptDetail(name: 'receiptDetail', path: 'detail/:id');
 
   const AppRoute({required this.name, required this.path});
 

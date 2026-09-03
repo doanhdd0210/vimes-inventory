@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../features/sample/data/datasources/sample_data_source.dart';
-import '../../features/sample/data/datasources/sample_in_memory_data_source.dart';
-import '../../features/sample/data/repositories/sample_repository_impl.dart';
-import '../../features/sample/domain/repositories/sample_repository.dart';
-import '../../features/sample/domain/usecases/add_sample_item.dart';
-import '../../features/sample/domain/usecases/get_sample_items.dart';
-import '../../features/sample/presentation/viewmodel/sample_bloc.dart';
+import '../../features/warehouse_receipt/data/datasources/warehouse_receipt_data_source.dart';
+import '../../features/warehouse_receipt/data/datasources/warehouse_receipt_in_memory_data_source.dart';
+import '../../features/warehouse_receipt/data/repositories/warehouse_receipt_repository_impl.dart';
+import '../../features/warehouse_receipt/domain/repositories/warehouse_receipt_repository.dart';
+import '../../features/warehouse_receipt/domain/usecases/create_warehouse_receipt.dart';
+import '../../features/warehouse_receipt/domain/usecases/get_warehouse_receipts.dart';
+import '../../features/warehouse_receipt/presentation/viewmodel/receipt_form_bloc.dart';
+import '../../features/warehouse_receipt/presentation/viewmodel/receipt_list_bloc.dart';
 import '../flavors/flavor_config.dart';
 import '../helpers/app_logger.dart';
 import '../storage/local_storage.dart';
@@ -25,7 +26,7 @@ Future<void> configureDependencies({bool? useFirebase}) async {
       (FlavorConfig.isInitialized ? FlavorConfig.instance.useFirebase : true);
 
   await _initCore(firebaseEnabled: firebaseEnabled);
-  _initSample(firebaseEnabled: firebaseEnabled);
+  _initWarehouseReceipt(firebaseEnabled: firebaseEnabled);
 }
 
 Future<void> _initCore({required bool firebaseEnabled}) async {
@@ -46,22 +47,23 @@ Future<void> _initCore({required bool firebaseEnabled}) async {
   }
 }
 
-void _initSample({required bool firebaseEnabled}) {
-  // Presentation (ViewModel) — factory: a fresh instance per screen.
-  sl.registerFactory(
-    () => SampleBloc(getSampleItems: sl(), addSampleItem: sl()),
-  );
+void _initWarehouseReceipt({required bool firebaseEnabled}) {
+  // Presentation (ViewModel)
+  sl.registerFactory(() => ReceiptFormBloc(createWarehouseReceipt: sl()));
+  sl.registerFactory(() => ReceiptListBloc(getWarehouseReceipts: sl()));
 
   // Domain
-  sl.registerLazySingleton(() => GetSampleItems(sl()));
-  sl.registerLazySingleton(() => AddSampleItem(sl()));
+  sl.registerLazySingleton(() => CreateWarehouseReceipt(sl()));
+  sl.registerLazySingleton(() => GetWarehouseReceipts(sl()));
 
   // Data
-  sl.registerLazySingleton<SampleRepository>(() => SampleRepositoryImpl(sl()));
-  sl.registerLazySingleton<SampleDataSource>(
+  sl.registerLazySingleton<WarehouseReceiptRepository>(
+    () => WarehouseReceiptRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<WarehouseReceiptDataSource>(
     () => firebaseEnabled
-        ? SampleFirestoreDataSource(sl())
-        : SampleInMemoryDataSource(),
+        ? WarehouseReceiptFirestoreDataSource(sl())
+        : WarehouseReceiptInMemoryDataSource(),
   );
 }
 

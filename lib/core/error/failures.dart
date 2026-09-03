@@ -32,3 +32,14 @@ class CacheFailure extends Failure {
   CacheFailure.fromException(CacheException exception)
     : this(message: exception.message);
 }
+
+/// Raised by a use case when its input breaks a business rule. [errors] maps a
+/// field key (e.g. `receiptNumber`, `items[2].quantityActual`) to a message.
+class ValidationFailure extends Failure {
+  const ValidationFailure(this.errors) : super(message: 'Dữ liệu không hợp lệ');
+
+  final Map<String, String> errors;
+
+  @override
+  List<Object?> get props => [message, errors];
+}

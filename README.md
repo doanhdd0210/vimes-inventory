@@ -82,8 +82,14 @@ lib/
 └── features/<feature>/     # auth · master_data · stock · warehouse_receipt
     ├── data/               # datasources (Firestore + in-memory) · models · repositories impl
     ├── domain/             # entities · repositories (abstract) · usecases
-    └── presentation/       # bloc/ (bloc + event + state + view-model data) · ui/ (pages + widgets)
+    └── presentation/<screen>/   # one folder per screen, each with:
+        ├── bloc/           #   bloc + event + state + view-model data
+        └── ui/             #   page + its widgets
 ```
+
+e.g. `warehouse_receipt/presentation/` → `receipt_form/`, `receipt_list/`,
+`receipt_detail/`; `auth/presentation/login/`. A screen's bloc sits next to the
+page that drives it.
 
 **Dependency rule:** `presentation → domain ← data`. `domain` imports nothing
 from `data` / `presentation` / Flutter / Firebase (grep-verified). `core` is

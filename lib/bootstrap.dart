@@ -8,7 +8,7 @@ import 'core/firebase/firebase_bootstrap.dart';
 import 'core/flavors/flavor.dart';
 import 'core/flavors/flavor_config.dart';
 import 'core/helpers/app_logger.dart';
-import 'features/auth/presentation/bloc/auth_cubit.dart';
+import 'features/auth/presentation/login/bloc/auth_cubit.dart';
 
 /// Single composition root shared by every flavor entry point.
 Future<void> bootstrap(Flavor flavor) async {

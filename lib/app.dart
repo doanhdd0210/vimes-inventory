@@ -6,7 +6,7 @@ import 'core/flavors/flavor_config.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
-import 'features/auth/presentation/bloc/auth_cubit.dart';
+import 'features/auth/presentation/login/bloc/auth_cubit.dart';
 
 class VimesApp extends StatelessWidget {
   const VimesApp({super.key});

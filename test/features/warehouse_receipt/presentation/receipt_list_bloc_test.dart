@@ -5,7 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:vimes_inventory/core/error/failures.dart';
 import 'package:vimes_inventory/core/usecase/usecase.dart';
 import 'package:vimes_inventory/features/warehouse_receipt/domain/usecases/get_warehouse_receipts.dart';
-import 'package:vimes_inventory/features/warehouse_receipt/presentation/bloc/receipt_list_bloc.dart';
+import 'package:vimes_inventory/features/warehouse_receipt/presentation/receipt_list/bloc/receipt_list_bloc.dart';
 
 import '../../../fixtures/warehouse_receipt_fixtures.dart';
 
